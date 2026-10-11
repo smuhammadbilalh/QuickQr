@@ -4,12 +4,12 @@
 
 ### Generate, share and scan QR codes — one app, every platform
 
-[![.NET MAUI](https://img.shields.io/badge/.NET%20MAUI-.NET%2010-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/apps/maui)
-[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#-supported-platforms)
-[![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=apple&logoColor=white)](#-supported-platforms)
-[![Windows](https://img.shields.io/badge/Windows-0078D4?style=for-the-badge)](#-supported-platforms)
-[![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)](#-supported-platforms)
-[![Stars](https://img.shields.io/github/stars/smuhammadbilalh/QuickQr?style=for-the-badge&color=f5a623)](https://github.com/smuhammadbilalh/QuickQr/stargazers)
+[![.NET MAUI](https://img.shields.io/badge/.NET%20MAUI-.NET%2010-0a0a0a?style=for-the-badge&logo=dotnet&logoColor=fafafa)](https://dotnet.microsoft.com/apps/maui)
+[![Android](https://img.shields.io/badge/Android-0a0a0a?style=for-the-badge&logo=android&logoColor=fafafa)](#-supported-platforms)
+[![iOS](https://img.shields.io/badge/iOS-0a0a0a?style=for-the-badge&logo=apple&logoColor=fafafa)](#-supported-platforms)
+[![Windows](https://img.shields.io/badge/Windows-0a0a0a?style=for-the-badge)](#-supported-platforms)
+[![macOS](https://img.shields.io/badge/macOS-0a0a0a?style=for-the-badge&logo=apple&logoColor=fafafa)](#-supported-platforms)
+[![Stars](https://img.shields.io/github/stars/smuhammadbilalh/QuickQr?style=for-the-badge&color=0a0a0a)](https://github.com/smuhammadbilalh/QuickQr/stargazers)
 
 </div>
 
@@ -84,9 +84,9 @@ QuickQr/
 
 **Muhammad Bilal** — IT Specialist & App Developer · Gujrat, Pakistan
 
-[![GitHub](https://img.shields.io/badge/GitHub-smuhammadbilalh-181717?style=for-the-badge&logo=github)](https://github.com/smuhammadbilalh)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-muhammadbilaltech-0A66C2?style=for-the-badge)](https://www.linkedin.com/in/muhammadbilaltech)
-[![Email](https://img.shields.io/badge/Email-smuhammadbilalh%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:smuhammadbilalh@gmail.com)
+[![GitHub](https://img.shields.io/badge/GitHub-smuhammadbilalh-0a0a0a?style=for-the-badge&logo=github)](https://github.com/smuhammadbilalh)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-muhammadbilaltech-0a0a0a?style=for-the-badge)](https://www.linkedin.com/in/muhammadbilaltech)
+[![Email](https://img.shields.io/badge/Email-smuhammadbilalh%40gmail.com-0a0a0a?style=for-the-badge&logo=gmail&logoColor=fafafa)](mailto:smuhammadbilalh@gmail.com)
 
 ⭐ If this project helped you, please consider giving it a star!
 
