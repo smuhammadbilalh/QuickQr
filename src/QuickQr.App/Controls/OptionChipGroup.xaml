@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Wrapping row of selectable chips bound to an OptionGroup. Locked (premium) options show a small lock. -->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="QuickQr.Controls.OptionChipGroup">
+    <ContentView.Resources>
+        <toolkit:BoolToObjectConverter x:Key="ChipStyleConverter"
+                                       TrueObject="{StaticResource ChipSelected}"
+                                       FalseObject="{StaticResource Chip}" />
+    </ContentView.Resources>
+
+    <FlexLayout x:Name="ChipsLayout"
+                x:DataType="OptionGroup"
+                Wrap="Wrap"
+                Direction="Row"
+                JustifyContent="Start"
+                AlignItems="Center"
+                BindableLayout.ItemsSource="{Binding Items}">
+        <BindableLayout.ItemTemplate>
+            <DataTemplate x:DataType="OptionItem">
+                <Border Style="{Binding IsSelected, Converter={StaticResource ChipStyleConverter}}"
+                        Margin="0,0,8,8"
+                        MinimumHeightRequest="44"
+                        Padding="14,6"
+                        SemanticProperties.Description="{Binding SemanticDescription}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label Style="{StaticResource IconGlyph}"
+                               Text="{Binding Glyph}"
+                               FontSize="18"
+                               IsVisible="{Binding HasGlyph}" />
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="{Binding Label}" FontSize="14" VerticalTextAlignment="Center" />
+                            <Label Text="{Binding Caption}" Style="{StaticResource Caption}" FontSize="11" IsVisible="{Binding HasCaption}" />
+                        </VerticalStackLayout>
+                        <Label Style="{StaticResource IconGlyph}"
+                               Text="&#xe899;"
+                               FontSize="14"
+                               TextColor="{StaticResource Premium}"
+                               IsVisible="{Binding IsLocked}" />
+                    </HorizontalStackLayout>
+                </Border>
+            </DataTemplate>
+        </BindableLayout.ItemTemplate>
+    </FlexLayout>
+</ContentView>

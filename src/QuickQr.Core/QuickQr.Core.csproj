@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    QuickQr.Core: domain model, application services and abstractions.
+    Rules: no dependency on MAUI, SkiaSharp, ZXing, SQLite or HTTP. Pure .NET, fully unit-testable.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>QuickQr.Core</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <!-- Microsoft.Extensions.DependencyInjection/Logging abstractions ship in the .NET 11 shared framework (NU1510). -->
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="QuickQr.Core.Tests" />
+  </ItemGroup>
+</Project>

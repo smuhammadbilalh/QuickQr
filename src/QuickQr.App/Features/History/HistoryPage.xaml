@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.History.HistoryPage"
+             x:DataType="HistoryViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Export" Command="{Binding ExportCommand}" Order="Primary" Priority="0"
+                     SemanticProperties.Description="Export history as CSV or JSON">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xf090;" Size="22"
+                                 Color="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+        <ToolbarItem Text="Clear" Command="{Binding ClearCommand}" Order="Primary" Priority="1"
+                     SemanticProperties.Description="Clear history">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe92e;" Size="22"
+                                 Color="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Resources>
+        <Style x:Key="SegmentChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+            <Setter Property="MinimumHeightRequest" Value="44" />
+            <Setter Property="Padding" Value="16,8" />
+        </Style>
+        <Style x:Key="SegmentText" TargetType="Label">
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="ItemCard" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}" />
+            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Search -->
+        <SearchBar Grid.Row="0" Margin="8,8,8,0" Placeholder="Search history"
+                   Text="{Binding SearchText}"
+                   SemanticProperties.Description="Search history" />
+
+        <!-- Segments + favourites -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Padding="16,8">
+            <HorizontalStackLayout Spacing="8">
+                <Border Style="{StaticResource SegmentChip}" SemanticProperties.Description="Show all codes">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectSegmentCommand}" CommandParameter="All" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsAllSelected}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Style="{StaticResource SegmentText}" Text="All" />
+                </Border>
+                <Border Style="{StaticResource SegmentChip}" SemanticProperties.Description="Show scanned codes">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectSegmentCommand}" CommandParameter="Scanned" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsScannedSelected}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Style="{StaticResource SegmentText}" Text="Scanned" />
+                </Border>
+                <Border Style="{StaticResource SegmentChip}" SemanticProperties.Description="Show created codes">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectSegmentCommand}" CommandParameter="Created" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsCreatedSelected}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Style="{StaticResource SegmentText}" Text="Created" />
+                </Border>
+                <BoxView WidthRequest="1" HeightRequest="24" VerticalOptions="Center" Margin="4,0" />
+                <Border Style="{StaticResource SegmentChip}" SemanticProperties.Description="Show favourites only">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleFavoritesOnlyCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding FavoritesOnly}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}" />
+                            <Setter Property="Stroke" Value="{StaticResource Premium}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <HorizontalStackLayout Spacing="6">
+                        <Label FontFamily="MaterialIconsFilled" Text="&#xf09a;" FontSize="16" TextColor="{StaticResource Premium}" VerticalOptions="Center" />
+                        <Label Style="{StaticResource SegmentText}" Text="Favourites" />
+                    </HorizontalStackLayout>
+                </Border>
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <!-- List -->
+        <RefreshView Grid.Row="2" IsVisible="{Binding ShowList}"
+                     IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Items}"
+                            SelectionMode="None"
+                            RemainingItemsThreshold="10"
+                            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="HistoryItemViewModel">
+                        <SwipeView Margin="16,4">
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem Text="Favourite" BackgroundColor="{StaticResource Premium}" Command="{Binding ToggleFavoriteCommand}">
+                                        <SwipeItem.IconImageSource>
+                                            <FontImageSource FontFamily="MaterialIconsFilled" Glyph="&#xf09a;" Size="22" Color="White" />
+                                        </SwipeItem.IconImageSource>
+                                    </SwipeItem>
+                                </SwipeItems>
+                            </SwipeView.LeftItems>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem Text="Delete" BackgroundColor="{StaticResource Danger}" Command="{Binding DeleteCommand}" IsDestructive="True">
+                                        <SwipeItem.IconImageSource>
+                                            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe92e;" Size="22" Color="White" />
+                                        </SwipeItem.IconImageSource>
+                                    </SwipeItem>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Border Style="{StaticResource ItemCard}" SemanticProperties.Description="{Binding Title}" SemanticProperties.Hint="Opens the details">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Border WidthRequest="44" HeightRequest="44" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}">
+                                        <Label Style="{StaticResource IconGlyph}" Text="{Binding Glyph}" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation" />
+                                        <Label Style="{StaticResource Caption}" Text="{Binding Subtitle}" IsVisible="{Binding HasSubtitle}" MaxLines="1" LineBreakMode="TailTruncation" />
+                                        <Label Style="{StaticResource Caption}" Text="{Binding Meta}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" BackgroundColor="Transparent"
+                                            Text="{Binding StarGlyph}" Command="{Binding ToggleFavoriteCommand}"
+                                            SemanticProperties.Description="{Binding StarDescription}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}">
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsFavorite}" Value="True">
+                                                <Setter Property="TextColor" Value="{StaticResource Premium}" />
+                                                <Setter Property="FontFamily" Value="MaterialIconsFilled" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.Footer>
+                    <BoxView HeightRequest="24" Color="Transparent" />
+                </CollectionView.Footer>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Empty states -->
+        <ScrollView Grid.Row="2" IsVisible="{Binding ShowEmpty}">
+            <VerticalStackLayout VerticalOptions="Center" Padding="32,40" Spacing="14" MaximumWidthRequest="420">
+                <Border WidthRequest="88" HeightRequest="88" HorizontalOptions="Center" StrokeShape="RoundRectangle 44"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}">
+                    <Label Style="{StaticResource IconGlyph}" Text="&#xe8b3;" FontSize="40" />
+                </Border>
+                <Label Style="{StaticResource Title}" Text="{Binding EmptyTitle}" HorizontalTextAlignment="Center" />
+                <Label Style="{StaticResource Muted}" Text="{Binding EmptyMessage}" HorizontalTextAlignment="Center" />
+                <Button Style="{StaticResource SecondaryButton}" Text="Clear filters" Command="{Binding ClearFiltersCommand}" IsVisible="{Binding IsFiltered}" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,8,0,0">
+                    <Button Style="{StaticResource PrimaryButton}" Text="Scan" Command="{Binding GoToScanCommand}" />
+                    <Button Grid.Column="1" Style="{StaticResource TonalButton}" HeightRequest="52" Text="Create" Command="{Binding GoToCreateCommand}" />
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="48" HeightRequest="48" />
+    </Grid>
+</ContentPage>

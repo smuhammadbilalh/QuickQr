@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.About.LicensesPage"
+             x:DataType="LicensesViewModel"
+             Title="{Binding Title}">
+    <CollectionView ItemsSource="{Binding Items}" SelectionMode="None" Margin="16,0">
+        <CollectionView.Header>
+            <Label Style="{StaticResource Muted}" Margin="4,16,4,8"
+                   Text="QuickQr is built on these open-source projects. Tap one to read its licence." />
+        </CollectionView.Header>
+        <CollectionView.ItemsLayout>
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+        </CollectionView.ItemsLayout>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="LicenseItem">
+                <Border Style="{StaticResource Card}" Padding="16,12" MinimumHeightRequest="56"
+                        SemanticProperties.Description="{Binding Name}"
+                        SemanticProperties.Hint="Opens the project page">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenCommand}" CommandParameter="{Binding Url}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                            <Label Style="{StaticResource Caption}" Text="{Binding License}" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Style="{StaticResource IconGlyph}" Text="&#xe89e;" FontSize="18" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+        <CollectionView.Footer>
+            <BoxView HeightRequest="24" Color="Transparent" />
+        </CollectionView.Footer>
+    </CollectionView>
+</ContentPage>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:scan="clr-namespace:QuickQr.Features.Scan"
+             x:Class="QuickQr.Features.History.HistoryDetailPage"
+             x:DataType="HistoryDetailViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{Binding FavoriteText}" Command="{Binding ToggleFavoriteCommand}" Order="Primary">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="{Binding StarFontFamily}" Glyph="{Binding StarGlyph}" Size="22" Color="{StaticResource Premium}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+        <ToolbarItem Text="Delete" Command="{Binding DeleteCommand}" Order="Primary">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe92e;" Size="22"
+                                 Color="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <ScrollView IsVisible="{Binding HasEntry}">
+            <VerticalStackLayout Padding="16,12,16,32" Spacing="14" MaximumWidthRequest="640">
+
+                <!-- Code image -->
+                <Border Style="{StaticResource Card}" Padding="20" HorizontalOptions="Fill">
+                    <Grid HeightRequest="260">
+                        <Image Source="{Binding CodeImage}" Aspect="AspectFit" IsVisible="{Binding HasImage}"
+                               SemanticProperties.Description="{Binding Heading}" />
+                        <ActivityIndicator IsRunning="{Binding IsImageLoading}" IsVisible="{Binding IsImageLoading}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Label Style="{StaticResource Muted}" Text="{Binding ImageError}" IsVisible="{Binding HasImageError}"
+                               HorizontalTextAlignment="Center" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Style="{StaticResource TonalButton}" Text="Share image" Command="{Binding ShareImageCommand}" IsEnabled="{Binding HasImage}">
+                        <Button.ImageSource>
+                            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe80d;" Size="18"
+                                             Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                        </Button.ImageSource>
+                    </Button>
+                    <Button Grid.Column="1" Style="{StaticResource TonalButton}" Text="Save image" Command="{Binding SaveImageCommand}" IsEnabled="{Binding HasImage}">
+                        <Button.ImageSource>
+                            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xf090;" Size="18"
+                                             Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                        </Button.ImageSource>
+                    </Button>
+                </Grid>
+
+                <!-- Summary -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border WidthRequest="48" HeightRequest="48" StrokeShape="RoundRectangle 14" VerticalOptions="Start"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}">
+                                <Label Style="{StaticResource IconGlyph}" Text="{Binding Glyph}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="{Binding Heading}" FontSize="18" FontAttributes="Bold" />
+                                <Label Style="{StaticResource Muted}" Text="{Binding Subtitle}" IsVisible="{Binding HasSubtitle}" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Border Style="{StaticResource CardAlt}" Padding="12,4,4,4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Editor Text="{Binding Payload, Mode=OneWay}" IsReadOnly="True" AutoSize="TextChanges"
+                                        MaximumHeightRequest="180" FontSize="14"
+                                        SemanticProperties.Description="Full content of the code" />
+                                <Button Grid.Column="1" Style="{StaticResource IconButton}" BackgroundColor="Transparent" Text="&#xe14d;"
+                                        VerticalOptions="Start" Command="{Binding CopyPayloadCommand}"
+                                        SemanticProperties.Description="Copy content" />
+                            </Grid>
+                        </Border>
+
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="6">
+                            <Label Style="{StaticResource Caption}" Text="Type" />
+                            <Label Grid.Column="1" Text="{Binding TypeName}" />
+                            <Label Grid.Row="1" Style="{StaticResource Caption}" Text="Format" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding FormatName}" />
+                            <Label Grid.Row="2" Style="{StaticResource Caption}" Text="Saved" />
+                            <Label Grid.Row="2" Grid.Column="1">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding CreatedText}" />
+                                        <Span Text=" · " />
+                                        <Span Text="{Binding SourceText}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Actions -->
+                <Button Style="{StaticResource PrimaryButton}" IsVisible="{Binding HasPrimaryAction}"
+                        Text="{Binding PrimaryAction.Label}" Command="{Binding PrimaryAction.Command}">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="{Binding PrimaryAction.Icon}" Size="20" Color="White" />
+                    </Button.ImageSource>
+                </Button>
+                <FlexLayout Wrap="Wrap" JustifyContent="Start" BindableLayout.ItemsSource="{Binding SecondaryActions}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="scan:ActionItem">
+                            <Button Style="{StaticResource TonalButton}" Text="{Binding Label}" Command="{Binding Command}" Margin="0,0,8,8" Padding="14,10">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="MaterialIcons" Glyph="{Binding Icon}" Size="18"
+                                                     Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                                </Button.ImageSource>
+                            </Button>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+                <Button Style="{StaticResource SecondaryButton}" Text="Edit &amp; re-create" Command="{Binding EditAndRecreateCommand}"
+                        SemanticProperties.Hint="Opens the Create tab with this content">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xf097;" Size="18"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </Button.ImageSource>
+                </Button>
+
+                <!-- Notes & tags -->
+                <Label Style="{StaticResource SectionHeader}" Text="Notes &amp; tags" />
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Border Style="{StaticResource CardAlt}" Padding="12,2">
+                            <Entry Text="{Binding Tags}" Placeholder="Tags, separated by commas" ReturnType="Done"
+                                   SemanticProperties.Description="Tags" />
+                        </Border>
+                        <Border Style="{StaticResource CardAlt}" Padding="12,2">
+                            <Editor Text="{Binding Notes}" Placeholder="Add a note" AutoSize="TextChanges" MinimumHeightRequest="88"
+                                    MaxLength="2000" SemanticProperties.Description="Notes" />
+                        </Border>
+                        <Button Style="{StaticResource TonalButton}" Text="Save notes" Command="{Binding SaveNotesCommand}"
+                                IsVisible="{Binding HasUnsavedNotes}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Button Style="{StaticResource DangerButton}" Text="Delete from history" Command="{Binding DeleteCommand}" Margin="0,8,0,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="48" HeightRequest="48" />
+    </Grid>
+</ContentPage>

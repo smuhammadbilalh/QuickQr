@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.About.AboutPage"
+             x:DataType="AboutViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <!-- Round social button with a vector brand mark (Icons.xaml) -->
+        <Style x:Key="SocialButton" TargetType="Border">
+            <Setter Property="WidthRequest" Value="56" />
+            <Setter Property="HeightRequest" Value="56" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardAltLight}, Dark={StaticResource CardAltDark}}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="SocialIcon" TargetType="Path">
+            <Setter Property="Aspect" Value="Uniform" />
+            <Setter Property="WidthRequest" Value="24" />
+            <Setter Property="HeightRequest" Value="24" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+        </Style>
+        <Style x:Key="SocialCaption" TargetType="Label" BasedOn="{StaticResource Caption}">
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="LinkRow" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="MinimumHeightRequest" Value="56" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,32" Spacing="16" MaximumWidthRequest="640">
+
+            <!-- Developer -->
+            <Border Style="{StaticResource Card}" Padding="20">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <Border WidthRequest="72" HeightRequest="72" StrokeShape="RoundRectangle 36" StrokeThickness="0"
+                            Background="{StaticResource BrandGradient}" VerticalOptions="Center"
+                            SemanticProperties.Description="{Binding Name}">
+                        <Label Text="{Binding Initials}" TextColor="White" FontSize="26" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Style="{StaticResource Title}" Text="{Binding Name}" FontAttributes="Bold" />
+                        <Label Style="{StaticResource Muted}" Text="{Binding Role}" />
+                        <Label Style="{StaticResource Caption}" Text="Creator of QuickQr" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Style="{StaticResource PrimaryButton}" Text="View portfolio" Command="{Binding OpenPortfolioCommand}">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe943;" Size="20" Color="White" />
+                    </Button.ImageSource>
+                </Button>
+                <Button Grid.Column="1" Style="{StaticResource TonalButton}" HeightRequest="52" Text="Join us" Command="{Binding OpenWhatsAppBusinessCommand}">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xea21;" Size="20"
+                                         Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                    </Button.ImageSource>
+                </Button>
+            </Grid>
+
+            <!-- Social -->
+            <Label Style="{StaticResource SectionHeader}" Text="Connect" />
+            <Border Style="{StaticResource Card}" Padding="12,20">
+                <VerticalStackLayout Spacing="16">
+                    <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto" RowSpacing="18">
+                        <VerticalStackLayout Grid.Column="0" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="GitHub profile">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}" CommandParameter="https://github.com/smuhammadbilalh" />
+                                </Border.GestureRecognizers>
+                                <Path Style="{StaticResource SocialIcon}" Data="{StaticResource GitHubIconGeometry}" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="GitHub" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="LinkedIn profile">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}" CommandParameter="https://www.linkedin.com/in/muhammadbilaltech/" />
+                                </Border.GestureRecognizers>
+                                <Path Style="{StaticResource SocialIcon}" Data="{StaticResource LinkedInIconGeometry}" Fill="#0A66C2" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="LinkedIn" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="X profile">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}" CommandParameter="https://x.com/Muhamma32151108" />
+                                </Border.GestureRecognizers>
+                                <Path Style="{StaticResource SocialIcon}" Data="{StaticResource XIconGeometry}" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="X" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="3" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="Facebook profile">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}" CommandParameter="https://www.facebook.com/muhammad.bilal.285914/" />
+                                </Border.GestureRecognizers>
+                                <Path Style="{StaticResource SocialIcon}" Data="{StaticResource FacebookIconGeometry}" Fill="#1877F2" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="Facebook" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="Instagram profile">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenLinkCommand}" CommandParameter="https://www.instagram.com/smuhammad_bilalh/" />
+                                </Border.GestureRecognizers>
+                                <Path Style="{StaticResource SocialIcon}" Data="{StaticResource InstagramIconGeometry}" Fill="#E4405F" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="Instagram" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="WhatsApp Business">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenWhatsAppBusinessCommand}" />
+                                </Border.GestureRecognizers>
+                                <Path Style="{StaticResource SocialIcon}" Data="{StaticResource WhatsAppIconGeometry}" Fill="#25D366" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="WhatsApp" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="1" Grid.Column="2" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="Send an email">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SendEmailCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Style="{StaticResource IconGlyph}" Text="&#xe159;" TextColor="#EA4335" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="Email" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="1" Grid.Column="3" Spacing="6">
+                            <Border Style="{StaticResource SocialButton}" SemanticProperties.Description="Call">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CallCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Style="{StaticResource IconGlyph}" Text="&#xf0d4;" TextColor="#34A853" />
+                            </Border>
+                            <Label Style="{StaticResource SocialCaption}" Text="Phone" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Label Style="{StaticResource Caption}" HorizontalTextAlignment="Center"
+                           Text="Follow for tech insights and development updates" FontAttributes="Italic" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- App -->
+            <Label Style="{StaticResource SectionHeader}" Text="The app" />
+            <Border Style="{StaticResource Card}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <Border WidthRequest="52" HeightRequest="52" StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                            Background="{StaticResource BrandGradient}" VerticalOptions="Center">
+                        <Label FontFamily="MaterialIcons" Text="&#xe00a;" FontSize="30" TextColor="White"
+                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="{Binding AppName}" FontSize="17" FontAttributes="Bold" />
+                        <Label Style="{StaticResource Caption}" Text="{Binding VersionText}" />
+                        <Label Style="{StaticResource Caption}" Text="Create and scan QR codes and barcodes, on-device and private." />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource LinkRow}" SemanticProperties.Description="Watch the demo video">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding WatchDemoCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Label Style="{StaticResource IconGlyph}" Text="&#xe1c4;" />
+                    <Label Grid.Column="1" Text="Watch the demo video" VerticalOptions="Center" />
+                    <Label Grid.Column="2" Style="{StaticResource IconGlyph}" Text="&#xe89e;" FontSize="18"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource LinkRow}" SemanticProperties.Description="Source code on GitHub">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenSourceCodeCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Label Style="{StaticResource IconGlyph}" Text="&#xe86f;" />
+                    <Label Grid.Column="1" Text="Source code" VerticalOptions="Center" />
+                    <Label Grid.Column="2" Style="{StaticResource IconGlyph}" Text="&#xe89e;" FontSize="18"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource LinkRow}" SemanticProperties.Description="Open-source licences">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenLicensesCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Label Style="{StaticResource IconGlyph}" Text="&#xe873;" />
+                    <Label Grid.Column="1" Text="Open-source licences" VerticalOptions="Center" />
+                    <Label Grid.Column="2" Style="{StaticResource IconGlyph}" Text="&#xe5cc;" FontSize="20"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                </Grid>
+            </Border>
+
+            <Label Style="{StaticResource Caption}" Text="{Binding Copyright}" HorizontalTextAlignment="Center" Margin="0,8,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

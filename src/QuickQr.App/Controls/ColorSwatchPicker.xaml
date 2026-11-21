@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Colour picker: preset swatches plus a hex entry. Two-way bind Color to a hex string. -->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Controls.ColorSwatchPicker">
+    <ContentView.Resources>
+        <HexToColorConverter x:Key="HexToColor" />
+    </ContentView.Resources>
+
+    <VerticalStackLayout Spacing="8">
+        <Label x:Name="TitleLabel" Style="{StaticResource Caption}" FontAttributes="Bold" />
+
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Border x:Name="CurrentChip"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    StrokeShape="RoundRectangle 22"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
+                    SemanticProperties.Description="Current colour" />
+            <Border Grid.Column="1" Style="{StaticResource CardAlt}" Padding="12,0">
+                <Entry x:Name="HexEntry"
+                       Placeholder="#RRGGBB"
+                       MaxLength="9"
+                       Keyboard="Plain"
+                       IsSpellCheckEnabled="False"
+                       IsTextPredictionEnabled="False"
+                       TextChanged="OnHexTextChanged"
+                       Unfocused="OnHexUnfocused" />
+            </Border>
+        </Grid>
+
+        <FlexLayout x:Name="SwatchLayout" Wrap="Wrap" Direction="Row" JustifyContent="Start">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <Border WidthRequest="44"
+                            HeightRequest="44"
+                            Margin="0,0,6,6"
+                            StrokeShape="RoundRectangle 22"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
+                            BackgroundColor="{Binding ., Converter={StaticResource HexToColor}}"
+                            SemanticProperties.Description="{Binding .}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnSwatchTapped" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </FlexLayout>
+    </VerticalStackLayout>
+</ContentView>

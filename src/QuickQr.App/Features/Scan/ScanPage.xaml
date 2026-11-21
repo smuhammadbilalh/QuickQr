@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:scanner="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
+             x:Class="QuickQr.Features.Scan.ScanPage"
+             x:DataType="ScanViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <FrontCameraToFacingConverter x:Key="FacingConverter" />
+
+        <Style x:Key="OverlayCaption" TargetType="Label">
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CameraControl" TargetType="Button" BasedOn="{StaticResource IconButton}">
+            <Setter Property="WidthRequest" Value="56" />
+            <Setter Property="HeightRequest" Value="56" />
+            <Setter Property="CornerRadius" Value="28" />
+            <Setter Property="BackgroundColor" Value="#66000000" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="BorderColor" Value="#40FFFFFF" />
+            <Setter Property="BorderWidth" Value="1" />
+        </Style>
+
+        <Style x:Key="Sheet" TargetType="Border">
+            <Setter Property="VerticalOptions" Value="End" />
+            <Setter Property="Padding" Value="20,10,20,20" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 28,28,0,0" />
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+            <Setter Property="Shadow" Value="{StaticResource CardShadow}" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+        <!-- ===== Live camera ===== -->
+        <Grid IsVisible="{Binding ShowCamera}" BackgroundColor="Black">
+            <scanner:CameraView x:Name="Camera"
+                                CameraEnabled="{Binding IsCameraEnabled}"
+                                PauseScanning="{Binding IsPaused}"
+                                TorchOn="{Binding IsTorchOn}"
+                                CameraFacing="{Binding UseFrontCamera, Converter={StaticResource FacingConverter}}"
+                                RequestZoomFactor="{Binding RequestedZoomFactor}"
+                                MinZoomFactor="{Binding MinZoom, Mode=OneWayToSource}"
+                                MaxZoomFactor="{Binding MaxZoom, Mode=OneWayToSource}"
+                                VibrationOnDetected="False"
+                                TapToFocusEnabled="True"
+                                ViewfinderMode="True"
+                                OnDetectionFinished="OnDetectionFinished"
+                                SemanticProperties.Description="Camera preview for scanning codes" />
+
+            <!-- Viewfinder -->
+            <Grid InputTransparent="True" RowDefinitions="*,Auto,Auto,*" Margin="0,0,0,150">
+                <Border Grid.Row="1"
+                        WidthRequest="250"
+                        HeightRequest="250"
+                        HorizontalOptions="Center"
+                        BackgroundColor="Transparent"
+                        Stroke="White"
+                        StrokeThickness="3"
+                        StrokeShape="RoundRectangle 28"
+                        Opacity="0.9">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,0" Radius="24" Opacity="0.5" />
+                    </Border.Shadow>
+                </Border>
+                <Border Grid.Row="2"
+                        IsVisible="{Binding ShowHint}"
+                        Margin="0,18,0,0"
+                        Padding="14,8"
+                        HorizontalOptions="Center"
+                        BackgroundColor="#80000000"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 16">
+                    <Label Text="{Binding HintText}" TextColor="White" FontSize="13" />
+                </Border>
+            </Grid>
+
+            <!-- Top: continuous mode + session badge -->
+            <HorizontalStackLayout VerticalOptions="Start" HorizontalOptions="End" Margin="16" Spacing="8">
+                <Border Padding="14,8"
+                        MinimumHeightRequest="44"
+                        BackgroundColor="#80000000"
+                        Stroke="#40FFFFFF"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 22"
+                        IsVisible="{Binding HasSession}"
+                        SemanticProperties.Description="Show the codes collected in this session">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleSessionListCommand}" />
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label FontFamily="MaterialIcons" Text="&#xe896;" FontSize="18" TextColor="White" VerticalOptions="Center" />
+                        <Label Text="{Binding SessionCountText}" TextColor="White" FontAttributes="Bold" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border x:Name="ContinuousChip"
+                        Padding="14,8"
+                        MinimumHeightRequest="44"
+                        BackgroundColor="#80000000"
+                        Stroke="#40FFFFFF"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 22"
+                        SemanticProperties.Description="Continuous scanning: collect many codes in one session">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleContinuousCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsContinuous}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label FontFamily="MaterialIcons" Text="&#xe43c;" FontSize="18" TextColor="White" VerticalOptions="Center" />
+                        <Label Text="{Binding ContinuousChipText}" TextColor="White" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Border Style="{StaticResource PremiumBadge}" IsVisible="{Binding IsContinuousLocked}">
+                            <Label Text="PRO" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                        </Border>
+                    </HorizontalStackLayout>
+                </Border>
+            </HorizontalStackLayout>
+
+            <!-- Bottom: last collected code, zoom and camera controls -->
+            <VerticalStackLayout VerticalOptions="End" Padding="20,0,20,24" Spacing="14">
+                <Border IsVisible="{Binding ShowLastSessionBanner}"
+                        HorizontalOptions="Center"
+                        Padding="14,8"
+                        BackgroundColor="#B3000000"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 16">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label FontFamily="MaterialIcons" Text="&#xe668;" FontSize="18" TextColor="{StaticResource Success}" VerticalOptions="Center" />
+                        <Label Text="{Binding LastSessionTitle}" TextColor="White" FontSize="13" MaxLines="1" LineBreakMode="TailTruncation" MaximumWidthRequest="260" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Grid IsVisible="{Binding HasZoom}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MaximumWidthRequest="360">
+                    <Label FontFamily="MaterialIcons" Text="&#xe900;" FontSize="20" TextColor="White" VerticalOptions="Center" />
+                    <Slider Grid.Column="1"
+                            Minimum="0"
+                            Maximum="1"
+                            Value="{Binding ZoomLevel}"
+                            MinimumTrackColor="White"
+                            MaximumTrackColor="#66FFFFFF"
+                            ThumbColor="White"
+                            SemanticProperties.Description="Zoom" />
+                    <Label Grid.Column="2" FontFamily="MaterialIcons" Text="&#xe8ff;" FontSize="20" TextColor="White" VerticalOptions="Center" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*,*,*" MaximumWidthRequest="380">
+                    <VerticalStackLayout Grid.Column="0" Spacing="6" HorizontalOptions="Center">
+                        <Button Style="{StaticResource CameraControl}"
+                                Text="{Binding TorchGlyph}"
+                                Command="{Binding ToggleTorchCommand}"
+                                SemanticProperties.Description="{Binding TorchDescription}" />
+                        <Label Style="{StaticResource OverlayCaption}" Text="Light" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="Center">
+                        <Button Style="{StaticResource CameraControl}"
+                                Text="&#xea37;"
+                                Command="{Binding FlipCameraCommand}"
+                                SemanticProperties.Description="Switch between front and back camera" />
+                        <Label Style="{StaticResource OverlayCaption}" Text="Flip" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="6" HorizontalOptions="Center">
+                        <Button Style="{StaticResource CameraControl}"
+                                Text="&#xe413;"
+                                Command="{Binding ScanFromImageCommand}"
+                                SemanticProperties.Description="Scan a code from an image" />
+                        <Label Style="{StaticResource OverlayCaption}" Text="Image" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="3" Spacing="6" HorizontalOptions="Center">
+                        <Button Style="{StaticResource CameraControl}"
+                                Text="&#xe14f;"
+                                Command="{Binding PasteFromClipboardCommand}"
+                                SemanticProperties.Description="Read a link or text from the clipboard" />
+                        <Label Style="{StaticResource OverlayCaption}" Text="Paste" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- ===== No camera ===== -->
+        <ScrollView IsVisible="{Binding ShowNoCamera}">
+            <VerticalStackLayout VerticalOptions="Center" Padding="32,48" Spacing="16" MaximumWidthRequest="440">
+                <Border WidthRequest="96" HeightRequest="96" HorizontalOptions="Center" StrokeShape="RoundRectangle 48"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}">
+                    <Label Style="{StaticResource IconGlyph}" Text="&#xf1a8;" FontSize="44" />
+                </Border>
+                <Label Style="{StaticResource Title}" Text="No camera found" HorizontalTextAlignment="Center" />
+                <Label Style="{StaticResource Muted}" HorizontalTextAlignment="Center"
+                       Text="You can still scan: open a screenshot or photo of a code, or paste a link or text you copied." />
+                <Button Style="{StaticResource PrimaryButton}" Text="Scan from image" Command="{Binding ScanFromImageCommand}" Margin="0,8,0,0" />
+                <Button Style="{StaticResource SecondaryButton}" Text="Paste from clipboard" Command="{Binding PasteFromClipboardCommand}" />
+                <Button Style="{StaticResource TonalButton}" Text="Look for a camera again" Command="{Binding RetryCameraCommand}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ===== Camera permission denied ===== -->
+        <ScrollView IsVisible="{Binding ShowPermissionDenied}">
+            <VerticalStackLayout VerticalOptions="Center" Padding="32,48" Spacing="16" MaximumWidthRequest="440">
+                <Border WidthRequest="96" HeightRequest="96" HorizontalOptions="Center" StrokeShape="RoundRectangle 48"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}">
+                    <Label Style="{StaticResource IconGlyph}" Text="&#xe04c;" FontSize="44" TextColor="{StaticResource Warning}" />
+                </Border>
+                <Label Style="{StaticResource Title}" Text="Camera access is off" HorizontalTextAlignment="Center" />
+                <Label Style="{StaticResource Muted}" HorizontalTextAlignment="Center"
+                       Text="QuickQr needs the camera to scan codes live. Images never leave your device." />
+                <Button Style="{StaticResource PrimaryButton}" Text="Allow camera" Command="{Binding RetryCameraCommand}" Margin="0,8,0,0" />
+                <Button Style="{StaticResource SecondaryButton}" Text="Open settings" Command="{Binding OpenAppSettingsCommand}" />
+                <Button Style="{StaticResource TonalButton}" Text="Scan from image" Command="{Binding ScanFromImageCommand}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ===== Result panel ===== -->
+        <Border Style="{StaticResource Sheet}" IsVisible="{Binding HasResult}">
+            <ScrollView MaximumHeightRequest="620">
+                <VerticalStackLayout Spacing="14">
+                    <BoxView WidthRequest="40" HeightRequest="4" CornerRadius="2" HorizontalOptions="Center" Margin="0,0,0,4" />
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border WidthRequest="48" HeightRequest="48" StrokeShape="RoundRectangle 14" VerticalOptions="Start"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}">
+                            <Label Style="{StaticResource IconGlyph}" Text="{Binding Result.Icon}" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding Result.Title}" FontSize="18" FontAttributes="Bold" MaxLines="2" LineBreakMode="TailTruncation" />
+                            <Label Style="{StaticResource Caption}" Text="{Binding Result.Meta}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="&#xe5cd;" VerticalOptions="Start"
+                                Command="{Binding DismissResultCommand}"
+                                SemanticProperties.Description="Close and scan again" />
+                    </Grid>
+
+                    <Label Style="{StaticResource Muted}" Text="{Binding Result.Subtitle}" IsVisible="{Binding Result.HasSubtitle}" />
+
+                    <!-- Full content (selectable) -->
+                    <Border Style="{StaticResource CardAlt}" Padding="12,4,4,4">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Editor Text="{Binding Result.Payload, Mode=OneWay}"
+                                    IsReadOnly="True"
+                                    AutoSize="TextChanges"
+                                    MaximumHeightRequest="160"
+                                    FontSize="14"
+                                    SemanticProperties.Description="Full content of the code" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Start">
+                                <Button Style="{StaticResource IconButton}" Text="&#xe14d;" BackgroundColor="Transparent"
+                                        Command="{Binding CopyPayloadCommand}" SemanticProperties.Description="Copy content" />
+                                <Button Style="{StaticResource IconButton}" Text="&#xe80d;" BackgroundColor="Transparent"
+                                        Command="{Binding SharePayloadCommand}" SemanticProperties.Description="Share content" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <!-- Link safety -->
+                    <Border IsVisible="{Binding Result.HasSafety}" Padding="14" StrokeThickness="1" StrokeShape="RoundRectangle 16"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardAltLight}, Dark={StaticResource CardAltDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Result.Safety.IsSafe}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SuccessSoftLight}, Dark={StaticResource SuccessSoftDark}}" />
+                                <Setter Property="Stroke" Value="{StaticResource Success}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding Result.Safety.IsMedium}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}" />
+                                <Setter Property="Stroke" Value="{StaticResource Warning}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding Result.Safety.IsHigh}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource DangerSoftLight}, Dark={StaticResource DangerSoftDark}}" />
+                                <Setter Property="Stroke" Value="{StaticResource Danger}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Style="{StaticResource IconGlyph}" Text="{Binding Result.Safety.Glyph}" TextColor="{StaticResource Info}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Result.Safety.IsSafe}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Success}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Result.Safety.IsMedium}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Result.Safety.IsHigh}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="1" Text="{Binding Result.Safety.Headline}" FontSize="15" FontAttributes="Bold" VerticalOptions="Center"
+                                       SemanticProperties.HeadingLevel="Level3" />
+                            </Grid>
+                            <Label IsVisible="{Binding Result.Safety.HasHost}" FontSize="15" LineBreakMode="CharacterWrap">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Result.Safety.HostPrefix}" />
+                                        <Span Text="{Binding Result.Safety.HostRegistrable}" FontAttributes="Bold" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Style="{StaticResource Caption}" Text="{Binding Result.Safety.Description}" />
+                            <VerticalStackLayout Spacing="6" IsVisible="{Binding Result.Safety.HasSignals}"
+                                                 BindableLayout.ItemsSource="{Binding Result.Safety.Signals}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="SafetySignalItem">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <Label Style="{StaticResource IconGlyph}" FontSize="16" Text="{Binding Glyph}" VerticalOptions="Start" />
+                                            <Label Grid.Column="1" Text="{Binding Description}" FontSize="13" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Actions (primary first) -->
+                    <Button Style="{StaticResource PrimaryButton}"
+                            IsVisible="{Binding Result.HasPrimaryAction}"
+                            Text="{Binding Result.PrimaryAction.Label}"
+                            Command="{Binding Result.PrimaryAction.Command}">
+                        <Button.ImageSource>
+                            <FontImageSource FontFamily="MaterialIcons" Glyph="{Binding Result.PrimaryAction.Icon}" Size="20" Color="White" />
+                        </Button.ImageSource>
+                    </Button>
+
+                    <FlexLayout Wrap="Wrap" JustifyContent="Start" BindableLayout.ItemsSource="{Binding Result.SecondaryActions}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="ActionItem">
+                                <Button Style="{StaticResource TonalButton}" Text="{Binding Label}" Command="{Binding Command}" Margin="0,0,8,8" Padding="14,10">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="{Binding Icon}" Size="18"
+                                                         Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                                    </Button.ImageSource>
+                                </Button>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+
+                    <Button Style="{StaticResource SecondaryButton}" Text="Scan again" Command="{Binding DismissResultCommand}" />
+                </VerticalStackLayout>
+            </ScrollView>
+        </Border>
+
+        <!-- ===== Continuous session ===== -->
+        <Border Style="{StaticResource Sheet}" IsVisible="{Binding IsSessionListOpen}">
+            <VerticalStackLayout Spacing="12">
+                <BoxView WidthRequest="40" HeightRequest="4" CornerRadius="2" HorizontalOptions="Center" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <VerticalStackLayout VerticalOptions="Center">
+                        <Label Style="{StaticResource Title}" Text="Scan session" />
+                        <Label Style="{StaticResource Caption}" Text="{Binding SessionCountText}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="&#xe5cd;"
+                            Command="{Binding ToggleSessionListCommand}" SemanticProperties.Description="Close the session list" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                    <Button Style="{StaticResource TonalButton}" Text="Export CSV" Command="{Binding ExportSessionCommand}" />
+                    <Button Grid.Column="1" Style="{StaticResource TonalButton}" Text="Share" Command="{Binding ShareSessionCommand}" />
+                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="&#xe0b8;" TextColor="{StaticResource Danger}"
+                            Command="{Binding ClearSessionCommand}" SemanticProperties.Description="Clear the session" />
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding SessionItems}" HeightRequest="340" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="SessionScanItem">
+                            <Border Style="{StaticResource CardAlt}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Label Style="{StaticResource IconGlyph}" Text="{Binding Icon}" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation" />
+                                        <Label Style="{StaticResource Caption}" Text="{Binding Value}" MaxLines="1" LineBreakMode="MiddleTruncation" />
+                                        <Label Style="{StaticResource Caption}" Text="{Binding Meta}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Border>
+
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="48" HeightRequest="48" />
+    </Grid>
+</ContentPage>

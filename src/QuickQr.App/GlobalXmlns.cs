@@ -1,0 +1,11 @@
+// Implicit XAML namespace (.NET 11 default): types in these CLR namespaces are usable in XAML without a prefix.
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Controls")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Converters")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.Generate")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.Batch")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.Premium")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.Scan")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.History")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.Settings")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "QuickQr.Features.About")]

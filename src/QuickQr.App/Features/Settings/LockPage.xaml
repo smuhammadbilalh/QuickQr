@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.Settings.LockPage"
+             x:DataType="LockViewModel"
+             Title="QuickQr is locked">
+    <Grid Padding="32">
+        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="18" MaximumWidthRequest="360">
+            <Border WidthRequest="112" HeightRequest="112" HorizontalOptions="Center"
+                    StrokeShape="RoundRectangle 56" Background="{StaticResource BrandGradient}">
+                <Label FontFamily="MaterialIcons" Text="&#xe899;" FontSize="52" TextColor="White"
+                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+            </Border>
+            <Label Style="{StaticResource Headline}" Text="QuickQr is locked" HorizontalTextAlignment="Center" />
+            <Label Style="{StaticResource Muted}" HorizontalTextAlignment="Center"
+                   Text="Use your fingerprint, face or device PIN to open your codes and history." />
+            <Label Text="{Binding Message}" IsVisible="{Binding HasMessage}" TextColor="{StaticResource Danger}"
+                   HorizontalTextAlignment="Center" />
+            <Button Style="{StaticResource PrimaryButton}" Text="Unlock" Command="{Binding UnlockCommand}"
+                    IsEnabled="{Binding IsNotBusy}" Margin="0,8,0,0"
+                    SemanticProperties.Hint="Shows the system authentication prompt">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe90d;" Size="20" Color="White" />
+                </Button.ImageSource>
+            </Button>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="QuickQr.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="QuickQr"
+    FlyoutBehavior="Disabled">
+
+    <!-- Root navigation: four tabs. Detail pages are pushed routes (see Routes.cs and the feature registrations). -->
+    <TabBar>
+        <ShellContent Title="Create" Route="create" ContentTemplate="{DataTemplate GeneratePage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe00a;" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent Title="Scan" Route="scan" ContentTemplate="{DataTemplate ScanPage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xf206;" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent Title="History" Route="history" ContentTemplate="{DataTemplate HistoryPage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b3;" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent Title="Settings" Route="settings" ContentTemplate="{DataTemplate SettingsPage}">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b8;" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+    </TabBar>
+</Shell>

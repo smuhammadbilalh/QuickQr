@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.Settings.SettingsPage"
+             x:DataType="SettingsViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <Style x:Key="RowTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+        <Style x:Key="Divider" TargetType="BoxView">
+            <Setter Property="HeightRequest" Value="1" />
+            <Setter Property="Margin" Value="0,4" />
+        </Style>
+        <Style x:Key="RowGlyph" TargetType="Label" BasedOn="{StaticResource IconGlyph}">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="WidthRequest" Value="28" />
+        </Style>
+        <Style x:Key="Chevron" TargetType="Label" BasedOn="{StaticResource IconGlyph}">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+        </Style>
+        <Style x:Key="SettingPicker" TargetType="Picker">
+            <Setter Property="MinimumWidthRequest" Value="150" />
+            <Setter Property="HorizontalTextAlignment" Value="End" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="16,12,16,32" Spacing="8" MaximumWidthRequest="680">
+
+                <!-- ===== Plan ===== -->
+                <Label Style="{StaticResource SectionHeader}" Text="Plan" />
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Border WidthRequest="48" HeightRequest="48" StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                                    Background="{StaticResource PremiumGradient}" VerticalOptions="Center">
+                                <Label FontFamily="MaterialIcons" Text="&#xe7af;" FontSize="26" TextColor="White"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="{Binding TierName}" FontSize="17" FontAttributes="Bold" />
+                                <Label Style="{StaticResource Caption}" Text="{Binding PlanDescription}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Button Style="{StaticResource PremiumButton}" Text="{Binding UpgradeText}"
+                                Command="{Binding UpgradeCommand}" IsVisible="{Binding CanUpgrade}" />
+                        <Button Style="{StaticResource SecondaryButton}" Text="Restore purchases"
+                                Command="{Binding RestorePurchasesCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== Appearance ===== -->
+                <Label Style="{StaticResource SectionHeader}" Text="Appearance" />
+                <Border Style="{StaticResource Card}" Padding="16,8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="Theme" />
+                            <Label Style="{StaticResource Caption}" Text="Follow the system or pick light or dark." />
+                        </VerticalStackLayout>
+                        <Picker Grid.Column="1" Style="{StaticResource SettingPicker}" Title="Theme"
+                                ItemsSource="{Binding ThemeOptions}" SelectedIndex="{Binding SelectedThemeIndex}"
+                                SemanticProperties.Description="Theme" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== Scanning ===== -->
+                <Label Style="{StaticResource SectionHeader}" Text="Scanning" />
+                <Border Style="{StaticResource Card}" Padding="16,8">
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Vibrate" />
+                                <Label Style="{StaticResource Caption}" Text="Short vibration when a code is found." />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding VibrateOnScan}" VerticalOptions="Center"
+                                    SemanticProperties.Description="Vibrate when a code is found" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Beep" />
+                                <Label Style="{StaticResource Caption}" Text="Play a short sound when a code is found." />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding BeepOnScan}" VerticalOptions="Center"
+                                    SemanticProperties.Description="Beep when a code is found" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Copy automatically" />
+                                <Label Style="{StaticResource Caption}" Text="Put every scanned code on the clipboard." />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding AutoCopyScans}" VerticalOptions="Center"
+                                    SemanticProperties.Description="Copy scanned codes automatically" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Open links with no warnings" />
+                                <Label Style="{StaticResource Caption}" Text="Open a scanned link right away when the link check finds nothing unusual. Links with warnings always ask first." />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding AutoOpenSafeLinks}" VerticalOptions="Center"
+                                    SemanticProperties.Description="Open links with no warnings automatically" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Save scans to history" />
+                                <Label Style="{StaticResource Caption}" Text="Keep scanned codes on this device." />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding SaveScansToHistory}" VerticalOptions="Center"
+                                    SemanticProperties.Description="Save scans to history" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== Creating ===== -->
+                <Label Style="{StaticResource SectionHeader}" Text="Creating" />
+                <Border Style="{StaticResource Card}" Padding="16,8">
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Error correction" />
+                                <Label Style="{StaticResource Caption}" Text="Higher levels survive damage but make denser codes." />
+                            </VerticalStackLayout>
+                            <Picker Grid.Column="1" Style="{StaticResource SettingPicker}" Title="Error correction"
+                                    ItemsSource="{Binding ErrorCorrectionOptions}" SelectedIndex="{Binding SelectedErrorCorrectionIndex}"
+                                    SemanticProperties.Description="Default error correction" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Style="{StaticResource RowTitle}" Text="Default format" VerticalOptions="Center" />
+                                    <Border Style="{StaticResource PremiumBadge}" IsVisible="{Binding IsAdvancedFormatsLocked}">
+                                        <Label Text="PRO" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                    </Border>
+                                </HorizontalStackLayout>
+                                <Label Style="{StaticResource Caption}" Text="QR Code is free; other barcodes are part of Pro." />
+                            </VerticalStackLayout>
+                            <Picker Grid.Column="1" Style="{StaticResource SettingPicker}" Title="Default format"
+                                    ItemsSource="{Binding FormatOptions}" SelectedIndex="{Binding SelectedFormatIndex}"
+                                    SemanticProperties.Description="Default barcode format" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Style="{StaticResource RowTitle}" Text="Export size" VerticalOptions="Center" />
+                                    <Border Style="{StaticResource PremiumBadge}" IsVisible="{Binding IsHighResolutionLocked}">
+                                        <Label Text="PRO" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                    </Border>
+                                </HorizontalStackLayout>
+                                <Label Style="{StaticResource Caption}" Text="Image size for saved and shared codes (above 1024 px is Pro)." />
+                            </VerticalStackLayout>
+                            <Picker Grid.Column="1" Style="{StaticResource SettingPicker}" Title="Export size"
+                                    ItemsSource="{Binding ExportSizeOptions}" SelectedIndex="{Binding SelectedExportSizeIndex}"
+                                    SemanticProperties.Description="Default export size" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Save created codes to history" />
+                                <Label Style="{StaticResource Caption}" Text="Keep codes you save or share so you can reuse them." />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding SaveGeneratedToHistory}" VerticalOptions="Center"
+                                    SemanticProperties.Description="Save created codes to history" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== Privacy & security ===== -->
+                <Label Style="{StaticResource SectionHeader}" Text="Privacy &amp; security" />
+                <Border Style="{StaticResource Card}" Padding="16,8">
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MinimumHeightRequest="52">
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Style="{StaticResource RowTitle}" Text="App lock" VerticalOptions="Center" />
+                                    <Border Style="{StaticResource PremiumBadge}" IsVisible="{Binding IsAppLockLocked}">
+                                        <Label Text="PRO" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                    </Border>
+                                </HorizontalStackLayout>
+                                <Label Style="{StaticResource Caption}" Text="{Binding AppLockDescription}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding AppLockEnabled}" VerticalOptions="Center"
+                                    SemanticProperties.Description="App lock" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" SemanticProperties.Description="Clear all history">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ClearHistoryCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xe92e;" TextColor="{StaticResource Danger}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Style="{StaticResource RowTitle}" Text="Clear history" TextColor="{StaticResource Danger}" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" SemanticProperties.Description="Privacy policy">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenPrivacyPolicyCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xf0dc;" VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Privacy policy" />
+                                <Label Style="{StaticResource Caption}" Text="No account, no ads, no tracking. Codes stay on your device." />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" Text="&#xe89e;" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== About ===== -->
+                <Label Style="{StaticResource SectionHeader}" Text="About" />
+                <Border Style="{StaticResource Card}" Padding="16,8">
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent">
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xe88e;" VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="QuickQr" />
+                                <Label Style="{StaticResource Caption}" Text="{Binding VersionText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" IsVisible="{Binding ShowUpdateCheck}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" IsVisible="{Binding ShowUpdateCheck}" SemanticProperties.Description="Check for updates">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CheckForUpdatesCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xf2cd;" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Style="{StaticResource RowTitle}" Text="Check for updates" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" Text="&#xe5cc;" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" SemanticProperties.Description="About QuickQr and its developer">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenAboutCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xf0d3;" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Style="{StaticResource RowTitle}" Text="About QuickQr" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" Text="&#xe5cc;" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" SemanticProperties.Description="Rate QuickQr">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding RateAppCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xf09a;" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Style="{StaticResource RowTitle}" Text="Rate QuickQr" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" Text="&#xe89e;" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" SemanticProperties.Description="Open-source licences">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenLicensesCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xe873;" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Style="{StaticResource RowTitle}" Text="Open-source licences" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" Text="&#xe5cc;" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="52" BackgroundColor="Transparent" SemanticProperties.Description="Reset all settings">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ResetSettingsCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Style="{StaticResource RowGlyph}" Text="&#xe8b3;" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Style="{StaticResource RowTitle}" Text="Reset settings" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                           HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="48" HeightRequest="48" />
+    </Grid>
+</ContentPage>

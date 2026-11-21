@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.Premium.PaywallPage"
+             x:DataType="PaywallViewModel"
+             Title="{Binding Title}"
+             Shell.PresentationMode="ModalAnimated"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="0,0,0,32" MaximumWidthRequest="760">
+
+            <!-- Hero -->
+            <Grid>
+                <Border Background="{StaticResource PremiumGradient}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 0,0,28,28"
+                        Padding="24,64,24,28">
+                    <VerticalStackLayout Spacing="12">
+                        <Border BackgroundColor="#33FFFFFF"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 30"
+                                WidthRequest="60"
+                                HeightRequest="60"
+                                HorizontalOptions="Start">
+                            <Label Text="{Binding HighlightGlyph}"
+                                   FontFamily="MaterialIcons"
+                                   FontSize="32"
+                                   TextColor="White"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"
+                                   SemanticProperties.Description="Premium" />
+                        </Border>
+                        <Label Text="{Binding HeroTitle}"
+                               FontSize="28"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               SemanticProperties.HeadingLevel="Level1" />
+                        <Label Text="One-time purchase. No subscription, no account, no ads: everything runs on your device."
+                               FontSize="15"
+                               TextColor="#F2FFFFFF" />
+                        <Border BackgroundColor="#33FFFFFF"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 14"
+                                Padding="12,6"
+                                HorizontalOptions="Start">
+                            <Label Text="{Binding CurrentTierText}" FontSize="13" FontAttributes="Bold" TextColor="White" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Button Text="&#xe5cd;"
+                        Style="{StaticResource IconButton}"
+                        BackgroundColor="#33FFFFFF"
+                        TextColor="White"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        Margin="12"
+                        Command="{Binding CloseCommand}"
+                        SemanticProperties.Description="Close" />
+            </Grid>
+
+            <!-- Feature the user tried -->
+            <Border Style="{StaticResource Card}" Margin="16,0" IsVisible="{Binding HasHighlight}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <Border Style="{StaticResource CardAlt}" WidthRequest="48" HeightRequest="48" Padding="0" VerticalOptions="Start">
+                        <Label Text="{Binding HighlightGlyph}" Style="{StaticResource IconGlyph}" FontSize="26" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{Binding HighlightName}" FontSize="17" FontAttributes="Bold" />
+                        <Label Text="{Binding HighlightDescription}" Style="{StaticResource Muted}" />
+                        <Label Text="{Binding HighlightTierText}" Style="{StaticResource Caption}" TextColor="{StaticResource PremiumDeep}" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Everything unlocked -->
+            <Border Style="{StaticResource Banner}" Margin="16,0" IsVisible="{Binding HasEverything}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Label Text="&#xf0be;" Style="{StaticResource IconGlyph}" TextColor="{StaticResource Success}" />
+                    <Label Grid.Column="1"
+                           Text="You have QuickQr Business: every feature is unlocked. Thank you for supporting QuickQr!"
+                           Style="{StaticResource Body}" />
+                </Grid>
+            </Border>
+
+            <!-- Products -->
+            <VerticalStackLayout Spacing="12" Padding="16,0" IsVisible="{Binding CanPurchase}">
+                <Label Text="Choose your plan" Style="{StaticResource SectionHeader}" />
+
+                <ActivityIndicator IsRunning="{Binding IsLoadingProducts}"
+                                   IsVisible="{Binding IsLoadingProducts}"
+                                   HorizontalOptions="Center"
+                                   SemanticProperties.Description="Loading plans" />
+
+                <Border Style="{StaticResource Banner}" IsVisible="{Binding HasProductsError}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <Label Text="{Binding ProductsError}" Style="{StaticResource Body}" VerticalTextAlignment="Center" />
+                        <Button Grid.Column="1" Text="Retry" Style="{StaticResource TonalButton}" Command="{Binding LoadProductsCommand}" />
+                    </Grid>
+                </Border>
+
+                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Products}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="ProductCardItem">
+                            <Border Style="{StaticResource Card}" SemanticProperties.Description="{Binding SemanticDescription}">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                                    <Label Text="{Binding TierName}" Style="{StaticResource Title}" FontAttributes="Bold" />
+                                    <Border Grid.Column="1" Style="{StaticResource PremiumBadge}" IsVisible="{Binding IsBestValue}">
+                                        <Label Text="BEST VALUE" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.5" TextColor="White" />
+                                    </Border>
+                                    <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Description}" Style="{StaticResource Muted}" />
+                                    <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="8">
+                                        <Label Text="{Binding Price}" FontSize="26" FontAttributes="Bold" VerticalTextAlignment="End" />
+                                        <Label Text="{Binding PeriodText}" Style="{StaticResource Caption}" VerticalTextAlignment="End" Margin="0,0,0,4" />
+                                    </HorizontalStackLayout>
+                                    <Button Grid.Row="3"
+                                            Grid.ColumnSpan="2"
+                                            Text="{Binding ButtonText}"
+                                            Style="{StaticResource PremiumButton}"
+                                            Command="{Binding PurchaseCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Plan comparison -->
+            <VerticalStackLayout Spacing="8" Padding="16,0">
+                <Label Text="Compare plans" Style="{StaticResource SectionHeader}" />
+                <Border Style="{StaticResource Card}" Padding="0">
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,52,52,68" Padding="16,12">
+                            <Label Text="Feature" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="Free" Style="{StaticResource Caption}" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            <Label Grid.Column="2" Text="Pro" Style="{StaticResource Caption}" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            <Label Grid.Column="3" Text="Business" Style="{StaticResource Caption}" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        </Grid>
+                        <BoxView HeightRequest="1" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Features}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="PlanFeatureItem">
+                                    <Grid ColumnDefinitions="*,52,52,68"
+                                          Padding="16,10"
+                                          SemanticProperties.Description="{Binding SemanticDescription}">
+                                        <Grid.Triggers>
+                                            <DataTrigger TargetType="Grid" Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimarySoftLight}, Dark={StaticResource PrimarySoftDark}}" />
+                                            </DataTrigger>
+                                        </Grid.Triggers>
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                            <Label Text="{Binding Glyph}" Style="{StaticResource IconGlyph}" FontSize="20" VerticalOptions="Start" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                <FlexLayout Wrap="Wrap" AlignItems="Center">
+                                                    <Label Text="{Binding Name}" FontAttributes="Bold" Margin="0,0,6,0" />
+                                                    <Border Style="{StaticResource Chip}" Padding="6,1" MinimumHeightRequest="0" IsVisible="{Binding IsComingSoon}">
+                                                        <Label Text="Coming soon" FontSize="10" FontAttributes="Bold" />
+                                                    </Border>
+                                                </FlexLayout>
+                                                <Label Text="{Binding Description}" Style="{StaticResource Caption}" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                        <Label Grid.Column="1" Text="&#xe668;" Style="{StaticResource IconGlyph}" TextColor="{StaticResource Success}" IsVisible="{Binding InFree}" />
+                                        <Label Grid.Column="1" Text="&#xe15b;" Style="{StaticResource IconGlyph}" Opacity="0.35" IsVisible="{Binding NotInFree}" />
+                                        <Label Grid.Column="2" Text="&#xe668;" Style="{StaticResource IconGlyph}" TextColor="{StaticResource Success}" IsVisible="{Binding InPro}" />
+                                        <Label Grid.Column="2" Text="&#xe15b;" Style="{StaticResource IconGlyph}" Opacity="0.35" IsVisible="{Binding NotInPro}" />
+                                        <Label Grid.Column="3" Text="&#xe668;" Style="{StaticResource IconGlyph}" TextColor="{StaticResource Success}" IsVisible="{Binding InBusiness}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Restore + small print -->
+            <VerticalStackLayout Spacing="10" Padding="16,0">
+                <Button Text="Restore purchases"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding RestoreCommand}"
+                        IsEnabled="{Binding IsNotBusy}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+                <Label Text="Payment is handled by your app store. Purchases are linked to your store account and can be restored on your other devices."
+                       Style="{StaticResource Caption}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  tests:
+    name: Core and infrastructure tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Core tests
+        run: dotnet test --project tests/QuickQr.Core.Tests/QuickQr.Core.Tests.csproj -c Release
+      - name: Codec tests
+        run: dotnet test --project tests/QuickQr.Codecs.Tests/QuickQr.Codecs.Tests.csproj -c Release
+      - name: Infrastructure tests
+        run: dotnet test --project tests/QuickQr.Infrastructure.Tests/QuickQr.Infrastructure.Tests.csproj -c Release
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: '21'
+      - run: dotnet workload install maui-android
+      - run: dotnet build src/QuickQr.App/QuickQr.App.csproj -f net11.0-android -c Release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quickqr-android
+          path: src/QuickQr.App/bin/Release/net11.0-android/*-Signed.a*
+          if-no-files-found: ignore
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet workload install maui-windows
+      - run: dotnet build src/QuickQr.App/QuickQr.App.csproj -f net11.0-windows10.0.19041.0 -c Release
+
+  apple:
+    name: iOS and Mac Catalyst
+    runs-on: macos-latest
+    needs: tests
+    # Requires a runner image with Xcode 27.2; unsigned build only.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet workload install maui-ios maui-maccatalyst
+      - run: dotnet build src/QuickQr.App/QuickQr.App.csproj -f net11.0-ios -c Release -p:EnableCodeSigning=false
+      - run: dotnet build src/QuickQr.App/QuickQr.App.csproj -f net11.0-maccatalyst -c Release -p:EnableCodeSigning=false

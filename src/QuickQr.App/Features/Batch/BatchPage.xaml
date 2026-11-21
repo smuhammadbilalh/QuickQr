@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuickQr.Features.Batch.BatchPage"
+             x:DataType="BatchViewModel"
+             Title="{Binding Title}">
+
+    <Grid>
+        <!-- Locked: Business upsell -->
+        <ScrollView IsVisible="{Binding IsLocked}">
+            <VerticalStackLayout Padding="16,24" Spacing="16" MaximumWidthRequest="640">
+                <Border Background="{StaticResource PremiumGradient}" StrokeThickness="0" StrokeShape="RoundRectangle 24" Padding="24">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="&#xe03c;" FontFamily="MaterialIcons" FontSize="40" TextColor="White" SemanticProperties.Description="Bulk generation" />
+                        <Label Text="Bulk generation is part of QuickQr Business"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               SemanticProperties.HeadingLevel="Level1" />
+                        <Label Text="Turn a spreadsheet into hundreds of ready-to-print codes in one go."
+                               FontSize="15"
+                               TextColor="#F2FFFFFF" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Label Text="&#xe873;" Style="{StaticResource IconGlyph}" VerticalOptions="Start" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Text="CSV or pasted lists" FontAttributes="Bold" />
+                                <Label Text="One code per line, or a CSV with content and file names." Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Label Text="&#xe149;" Style="{StaticResource IconGlyph}" VerticalOptions="Start" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Text="ZIP download" FontAttributes="Bold" />
+                                <Label Text="Up to 5,000 codes in PNG, JPEG, WebP, SVG or PDF with a manifest." Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Label Text="&#xe8ad;" Style="{StaticResource IconGlyph}" VerticalOptions="Start" />
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Text="Print sheets" FontAttributes="Bold" />
+                                <Label Text="Label and sticker layouts on A4 or US Letter as PDF." Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Button Text="See plans" Style="{StaticResource PremiumButton}" Command="{Binding UpgradeCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Unlocked -->
+        <ScrollView IsVisible="{Binding IsUnlocked}">
+            <VerticalStackLayout Padding="16,12,16,32" Spacing="16" MaximumWidthRequest="820">
+
+                <!-- 1. Input -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="1. Add your data" Style="{StaticResource Title}" />
+                        <Label Text="One code per line, or a CSV file with the content in the first column and an optional file name in the second."
+                               Style="{StaticResource Muted}" />
+                        <FlexLayout Wrap="Wrap" Direction="Row">
+                            <Button Text="Import CSV / TXT"
+                                    Style="{StaticResource TonalButton}"
+                                    Margin="0,0,8,8"
+                                    ContentLayout="Left,8"
+                                    Command="{Binding ImportFileCommand}">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xf09b;" Size="18"
+                                                     Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                                </Button.ImageSource>
+                            </Button>
+                            <Button Text="Paste"
+                                    Style="{StaticResource TonalButton}"
+                                    Margin="0,0,8,8"
+                                    ContentLayout="Left,8"
+                                    Command="{Binding PasteCommand}">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe14f;" Size="18"
+                                                     Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                                </Button.ImageSource>
+                            </Button>
+                            <Button Text="Clear"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Margin="0,0,8,8"
+                                    Command="{Binding ClearInputCommand}" />
+                        </FlexLayout>
+                        <Border Style="{StaticResource CardAlt}" Padding="12,4">
+                            <Editor Text="{Binding InputText}"
+                                    HeightRequest="180"
+                                    Placeholder="https://example.com/product/1,product-1&#10;https://example.com/product/2,product-2"
+                                    IsSpellCheckEnabled="False"
+                                    IsTextPredictionEnabled="False"
+                                    SemanticProperties.Description="Batch input, one code per line" />
+                        </Border>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="First row is a header" VerticalTextAlignment="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding HasHeaderRow}" SemanticProperties.Description="First row is a header" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout>
+                                <Label Text="Second column is the file name" VerticalTextAlignment="Center" />
+                                <Label Text="Otherwise files are numbered automatically." Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding UseFileNameColumn}" VerticalOptions="Center" SemanticProperties.Description="Second column is the file name" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 2. Preview -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="2. Check the rows" Style="{StaticResource Title}" />
+                            <Label Grid.Column="1" Text="{Binding ItemCountText}" Style="{StaticResource Caption}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        </Grid>
+                        <Label Text="Rows appear here as you type or import." Style="{StaticResource Muted}" IsVisible="{Binding HasNoItems}" />
+
+                        <Border Style="{StaticResource Banner}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}"
+                                IsVisible="{Binding HasWarnings}">
+                            <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Warnings}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <Label Text="&#xf083;" Style="{StaticResource IconGlyph}" FontSize="16" TextColor="{StaticResource Warning}" VerticalOptions="Start" />
+                                            <Label Grid.Column="1" Text="{Binding .}" Style="{StaticResource Caption}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding PreviewRows}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="BatchRowItem">
+                                    <Border Style="{StaticResource CardAlt}" Padding="10,8" SemanticProperties.Description="{Binding SemanticDescription}">
+                                        <Grid ColumnDefinitions="32,*" ColumnSpacing="8">
+                                            <Label Text="{Binding Number}" Style="{StaticResource Caption}" VerticalTextAlignment="Center" />
+                                            <VerticalStackLayout Grid.Column="1">
+                                                <Label Text="{Binding Payload}" FontSize="13" LineBreakMode="TailTruncation" />
+                                                <Label Text="{Binding FileName}" Style="{StaticResource Caption}" LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label Text="{Binding PreviewFooter}" Style="{StaticResource Caption}" IsVisible="{Binding HasMoreRows}" HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 3. Options -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <Label Text="3. Choose the look" Style="{StaticResource Title}" />
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Barcode format" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding Formats}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsQrFormat}">
+                            <Label Text="Error correction" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding ErrorCorrections}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Design (preset or brand kit)" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding Styles}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Image size" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding Sizes}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="File format" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding ExportFormats}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 4. ZIP -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="4. Create" Style="{StaticResource Title}" />
+                        <Button Text="Generate ZIP"
+                                Style="{StaticResource PrimaryButton}"
+                                ContentLayout="Left,8"
+                                Command="{Binding GenerateZipCommand}"
+                                IsEnabled="{Binding IsNotGenerating}">
+                            <Button.ImageSource>
+                                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe149;" Size="20" Color="{StaticResource OnPrimary}" />
+                            </Button.ImageSource>
+                        </Button>
+
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding IsGenerating}">
+                            <ProgressBar Progress="{Binding Progress}" SemanticProperties.Description="Generation progress" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding ProgressText}" Style="{StaticResource Caption}" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1"
+                                        Text="Cancel"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Command="{Binding CancelGenerationCommand}" />
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <Border Style="{StaticResource Banner}" IsVisible="{Binding HasOutput}">
+                            <VerticalStackLayout Spacing="10">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Text="&#xf0be;" Style="{StaticResource IconGlyph}" TextColor="{StaticResource Success}" />
+                                    <Label Grid.Column="1" Text="{Binding ResultText}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                </Grid>
+                                <Label Text="{Binding FailureText}" Style="{StaticResource Caption}" IsVisible="{Binding HasFailures}" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <Button Text="Share" Style="{StaticResource PrimaryButton}" Command="{Binding ShareOutputCommand}" />
+                                    <Button Grid.Column="1" Text="Save" Style="{StaticResource SecondaryButton}" Command="{Binding SaveOutputCommand}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 5. Print sheet -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Print sheet (PDF)" Style="{StaticResource Title}" VerticalTextAlignment="Center" />
+                            <PremiumLockBadge Text="BUSINESS" IsVisible="{Binding ArePrintSheetsLocked}" />
+                        </HorizontalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Paper" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding Papers}" />
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding ColumnsText}" VerticalTextAlignment="Center" />
+                            <Stepper Grid.Column="1" Maximum="8" Minimum="1" Increment="1" Value="{Binding Columns}" SemanticProperties.Description="Columns per sheet" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding RowsText}" VerticalTextAlignment="Center" />
+                            <Stepper Grid.Column="1" Maximum="14" Minimum="1" Increment="1" Value="{Binding Rows}" SemanticProperties.Description="Rows per sheet" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Print the content under each code" VerticalTextAlignment="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding PrintLabels}" SemanticProperties.Description="Print labels under codes" />
+                        </Grid>
+                        <Label Text="{Binding SheetLayoutText}" Style="{StaticResource Caption}" />
+                        <Button Text="Create print sheet"
+                                Style="{StaticResource TonalButton}"
+                                ContentLayout="Left,8"
+                                Command="{Binding GeneratePrintSheetCommand}"
+                                IsEnabled="{Binding IsNotGenerating}">
+                            <Button.ImageSource>
+                                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8ad;" Size="18"
+                                                 Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                            </Button.ImageSource>
+                        </Button>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

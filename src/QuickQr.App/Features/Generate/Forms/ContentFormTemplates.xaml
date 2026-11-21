@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- One layout per content form. Selected by ContentFormTemplateSelector; every template is compiled against its form view model. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="QuickQr.Features.Generate.ContentFormTemplates">
+
+    <DataTemplate x:Key="TextForm" x:DataType="TextFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormEditorField Label="Text" Placeholder="Type or paste any text" Text="{Binding Text}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="UrlForm" x:DataType="UrlFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Website address"
+                       Placeholder="https://example.com"
+                       Keyboard="Url"
+                       Text="{Binding Url}"
+                       Hint="https:// is added automatically when missing." />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WifiForm" x:DataType="WifiFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Network name (SSID)" Placeholder="Home Wi-Fi" Text="{Binding Ssid}" />
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Security" Style="{DynamicResource Caption}" FontAttributes="Bold" />
+                <OptionChipGroup Group="{Binding Security}" />
+            </VerticalStackLayout>
+            <FormField Label="Password" IsPassword="True" Text="{Binding Password}" IsVisible="{Binding NeedsPassword}" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Hidden network" VerticalTextAlignment="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding Hidden}" SemanticProperties.Description="Hidden network" />
+            </Grid>
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ContactForm" x:DataType="ContactFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout>
+                    <Label Text="Compact MeCard" VerticalTextAlignment="Center" />
+                    <Label Text="Smaller code, fewer fields. vCard is the most compatible." Style="{DynamicResource Caption}" />
+                </VerticalStackLayout>
+                <Switch Grid.Column="1" IsToggled="{Binding UseMeCard}" VerticalOptions="Center" SemanticProperties.Description="Use compact MeCard format" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="First name" Text="{Binding FirstName}" />
+                <FormField Grid.Column="1" Label="Last name" Text="{Binding LastName}" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="Company" Text="{Binding Organization}" />
+                <FormField Grid.Column="1" Label="Job title" Text="{Binding JobTitle}" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="Mobile" Keyboard="Telephone" Text="{Binding MobilePhone}" />
+                <FormField Grid.Column="1" Label="Work phone" Keyboard="Telephone" Text="{Binding WorkPhone}" />
+            </Grid>
+            <FormField Label="Email" Keyboard="Email" Text="{Binding Email}" />
+            <FormField Label="Website" Keyboard="Url" Text="{Binding Website}" />
+            <FormField Label="Street" Text="{Binding Street}" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="City" Text="{Binding City}" />
+                <FormField Grid.Column="1" Label="Postal code" Text="{Binding PostalCode}" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="State / region" Text="{Binding Region}" />
+                <FormField Grid.Column="1" Label="Country" Text="{Binding Country}" />
+            </Grid>
+            <FormEditorField Label="Note" Text="{Binding Note}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="EmailForm" x:DataType="EmailFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="To" Placeholder="name@example.com" Keyboard="Email" Text="{Binding To}" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="Cc" Keyboard="Email" Text="{Binding Cc}" />
+                <FormField Grid.Column="1" Label="Bcc" Keyboard="Email" Text="{Binding Bcc}" />
+            </Grid>
+            <FormField Label="Subject" Text="{Binding Subject}" />
+            <FormEditorField Label="Message" Text="{Binding Body}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SmsForm" x:DataType="SmsFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Phone number" Placeholder="+1 555 123 4567" Keyboard="Telephone" Text="{Binding Number}" />
+            <FormEditorField Label="Message" Text="{Binding Message}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PhoneForm" x:DataType="PhoneFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Phone number"
+                       Placeholder="+1 555 123 4567"
+                       Keyboard="Telephone"
+                       Text="{Binding Number}"
+                       Hint="Include the country code so it works abroad." />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="GeoForm" x:DataType="GeoFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <FormField Label="Latitude" Placeholder="51.5074" Keyboard="Numeric" Text="{Binding Latitude}" />
+                <FormField Grid.Column="1" Label="Longitude" Placeholder="-0.1278" Keyboard="Numeric" Text="{Binding Longitude}" />
+            </Grid>
+            <FormField Label="Place name (optional)" Placeholder="Trafalgar Square" Text="{Binding Label}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="EventForm" x:DataType="EventFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Title" Placeholder="Team meeting" Text="{Binding EventTitle}" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="All day" VerticalTextAlignment="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding AllDay}" SemanticProperties.Description="All-day event" />
+            </Grid>
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Starts" Style="{DynamicResource Caption}" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Style="{DynamicResource CardAlt}" Padding="12,0">
+                        <DatePicker Date="{Binding StartDate}" SemanticProperties.Description="Start date" />
+                    </Border>
+                    <Border Grid.Column="1" Style="{DynamicResource CardAlt}" Padding="12,0" IsVisible="{Binding ShowTimes}">
+                        <TimePicker Time="{Binding StartTime}" SemanticProperties.Description="Start time" />
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Ends" Style="{DynamicResource Caption}" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Style="{DynamicResource CardAlt}" Padding="12,0">
+                        <DatePicker Date="{Binding EndDate}" SemanticProperties.Description="End date" />
+                    </Border>
+                    <Border Grid.Column="1" Style="{DynamicResource CardAlt}" Padding="12,0" IsVisible="{Binding ShowTimes}">
+                        <TimePicker Time="{Binding EndTime}" SemanticProperties.Description="End time" />
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+            <FormField Label="Location" Text="{Binding Location}" />
+            <FormEditorField Label="Description" Text="{Binding Description}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WhatsAppForm" x:DataType="WhatsAppFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="WhatsApp number"
+                       Placeholder="+44 7700 900123"
+                       Keyboard="Telephone"
+                       Text="{Binding Number}"
+                       Hint="International format with country code." />
+            <FormEditorField Label="Pre-filled message (optional)" Text="{Binding Message}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="TelegramForm" x:DataType="TelegramFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Telegram username" Placeholder="@username" Text="{Binding Username}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CryptoForm" x:DataType="CryptoFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Currency" Style="{DynamicResource Caption}" FontAttributes="Bold" />
+                <OptionChipGroup Group="{Binding Currency}" />
+            </VerticalStackLayout>
+            <FormField Label="Wallet address" Text="{Binding Address}" />
+            <FormField Label="Amount (optional)" Placeholder="0.0015" Keyboard="Numeric" Text="{Binding Amount}" />
+            <FormField Label="Label (optional)" Text="{Binding Label}" />
+            <FormField Label="Message (optional)" Text="{Binding Message}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SepaForm" x:DataType="SepaFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Beneficiary name" Placeholder="Jane Doe" MaxLength="70" Text="{Binding BeneficiaryName}" />
+            <FormField Label="IBAN" Placeholder="DE89 3704 0044 0532 0130 00" Text="{Binding Iban}" />
+            <FormField Label="BIC (optional)" Placeholder="COBADEFFXXX" Text="{Binding Bic}" />
+            <FormField Label="Amount in EUR (optional)" Placeholder="25.50" Keyboard="Numeric" Text="{Binding Amount}" />
+            <FormField Label="Reference (optional)"
+                       MaxLength="140"
+                       Text="{Binding Reference}"
+                       Hint="Free text, or a creditor reference starting with RF." />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="UpiForm" x:DataType="UpiFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="UPI ID (VPA)" Placeholder="name@bank" Keyboard="Email" Text="{Binding PayeeAddress}" />
+            <FormField Label="Payee name" Text="{Binding PayeeName}" />
+            <FormField Label="Amount in INR (optional)" Placeholder="250" Keyboard="Numeric" Text="{Binding Amount}" />
+            <FormField Label="Note (optional)" Text="{Binding Note}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AppStoreForm" x:DataType="AppStoreFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Store" Style="{DynamicResource Caption}" FontAttributes="Bold" />
+                <OptionChipGroup Group="{Binding Store}" />
+            </VerticalStackLayout>
+            <FormField Label="App id" Placeholder="{Binding AppIdPlaceholder}" Hint="{Binding AppIdHint}" Text="{Binding AppId}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SocialForm" x:DataType="SocialFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Network" Style="{DynamicResource Caption}" FontAttributes="Bold" />
+                <OptionChipGroup Group="{Binding Network}" />
+            </VerticalStackLayout>
+            <FormField Label="Username" Placeholder="@username" Text="{Binding Handle}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ProductForm" x:DataType="ProductFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <FormField Label="Product code"
+                       Placeholder="4006381333931"
+                       Keyboard="Numeric"
+                       MaxLength="14"
+                       Text="{Binding Code}"
+                       Hint="EAN-13, EAN-8, UPC-A or UPC-E digits. Choose the matching barcode format below." />
+        </VerticalStackLayout>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SecureForm" x:DataType="SecureMessageFormViewModel">
+        <VerticalStackLayout Spacing="14">
+            <Border Style="{DynamicResource Banner}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Label Text="&#xe899;" Style="{DynamicResource IconGlyph}" FontSize="20" VerticalOptions="Start" />
+                    <Label Grid.Column="1"
+                           Text="The message is encrypted on this device. Only QuickQr users who know the passphrase can read it. Share the passphrase separately."
+                           Style="{DynamicResource Caption}" />
+                </Grid>
+            </Border>
+            <FormEditorField Label="Secret message" Text="{Binding Message}" />
+            <FormField Label="Passphrase" IsPassword="True" Text="{Binding Passphrase}" Hint="At least 8 characters. It can't be recovered if you forget it." />
+            <FormField Label="Confirm passphrase" IsPassword="True" Text="{Binding ConfirmPassphrase}" />
+        </VerticalStackLayout>
+    </DataTemplate>
+</ResourceDictionary>

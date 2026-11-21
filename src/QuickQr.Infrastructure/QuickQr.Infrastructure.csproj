@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    QuickQr.Infrastructure: adapters for the Core ports.
+    ZXing.Net (encode/decode), SkiaSharp (raster/PDF rendering), SQLite (history), plain HttpClient (updates, link reputation).
+    No MAUI dependency: platform specifics arrive through Core.Platform abstractions.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>QuickQr.Infrastructure</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuickQr.Core\QuickQr.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ZXing.Net" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <!-- Microsoft.Extensions.Options ships in the .NET 11 shared framework (NU1510). -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="QuickQr.Infrastructure.Tests" />
+    <InternalsVisibleTo Include="QuickQr.Codecs.Tests" />
+  </ItemGroup>
+</Project>

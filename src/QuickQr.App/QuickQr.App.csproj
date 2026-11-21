@@ -1,0 +1,90 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net11.0-android;net11.0-ios;net11.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net11.0-windows10.0.19041.0</TargetFrameworks>
+
+    <OutputType>Exe</OutputType>
+    <RootNamespace>QuickQr</RootNamespace>
+    <AssemblyName>QuickQr</AssemblyName>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <MauiVersion>11.0.10</MauiVersion>
+
+    <!-- XAML: source generator is the .NET 11 default; compile bindings even when Source is set. -->
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+
+    <!-- Display name / identity / version (version comes from Directory.Build.props) -->
+    <ApplicationTitle>QuickQr</ApplicationTitle>
+    <ApplicationId>muhammadbilal.quickqr</ApplicationId>
+    <ApplicationDisplayVersion>$(QuickQrVersion)</ApplicationDisplayVersion>
+    <ApplicationVersion>$(QuickQrBuildNumber)</ApplicationVersion>
+
+    <!-- Unpackaged Windows app. See https://aka.ms/MauiTemplateUnpackaged for MSIX/Store packaging. -->
+    <WindowsPackageType>None</WindowsPackageType>
+
+    <!-- .NET 11 minimums (Android SDK floor is 24; CommunityToolkit.Maui 17 requires MacCatalyst 17). -->
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+  </PropertyGroup>
+
+  <!--
+    Release (size-tuned): AAB for Google Play + APK for GitHub releases, R8 shrinking, IL trimming (SDK default: partial)
+    and ARM-only native code (x86_64 is only needed by emulators, which use Debug builds).
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <AndroidPackageFormats>aab;apk</AndroidPackageFormats>
+    <AndroidLinkTool>r8</AndroidLinkTool>
+    <RuntimeIdentifiers>android-arm64;android-arm</RuntimeIdentifiers>
+    <!-- -p:QuickQrArm64Only=true: smallest sideload APK for modern (64-bit) phones. -->
+    <RuntimeIdentifiers Condition="'$(QuickQrArm64Only)' == 'true'">android-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!--
+    XA4301: ML Kit's bundled barcode model (libbarhopper_v3.so) and CameraX JNI libraries ship in two AARs pulled in by
+    BarcodeScanning.Native.Maui. The packager keeps a single copy, so the duplicate notice is informational only.
+  -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <NoWarn>$(NoWarn);XA4301</NoWarn>
+  </PropertyGroup>
+
+  <!-- Dev/QA flavour: optimized Release build that uses the simulated store (-p:QuickQrSimulatedStore=true). -->
+  <PropertyGroup Condition="'$(QuickQrSimulatedStore)' == 'true'">
+    <DefineConstants>$(DefineConstants);SIMULATED_STORE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Size: drop third-party satellite resource assemblies for languages QuickQr is not localized into yet. -->
+  <PropertyGroup>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" BaseSize="128,128" />
+    <MauiImage Include="Resources\Images\*" />
+    <MauiFont Include="Resources\Fonts\*" />
+    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuickQr.Infrastructure\QuickQr.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="CommunityToolkit.Maui" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="BarcodeScanning.Native.Maui" />
+    <PackageReference Include="Plugin.InAppBilling" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" />
+    <PackageReference Include="Xamarin.AndroidX.Tracing.Tracing.Ktx" />
+  </ItemGroup>
+
+</Project>

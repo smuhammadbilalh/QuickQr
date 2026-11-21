@@ -1,0 +1,19 @@
+﻿<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/QuickQr.Core/QuickQr.Core.csproj" />
+    <Project Path="src/QuickQr.Infrastructure/QuickQr.Infrastructure.csproj" />
+    <Project Path="src/QuickQr.App/QuickQr.App.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/QuickQr.Core.Tests/QuickQr.Core.Tests.csproj" />
+    <Project Path="tests/QuickQr.Codecs.Tests/QuickQr.Codecs.Tests.csproj" />
+    <Project Path="tests/QuickQr.Infrastructure.Tests/QuickQr.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

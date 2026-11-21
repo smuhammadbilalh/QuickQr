@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/maui/global"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="QuickQr.Features.Generate.GeneratePage"
+             x:DataType="GenerateViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <toolkit:ByteArrayToImageSourceConverter x:Key="BytesToImage" />
+        <toolkit:InvertedBoolConverter x:Key="InvertedBool" />
+        <toolkit:BoolToObjectConverter x:Key="TileStyle"
+                                       TrueObject="{StaticResource ChipSelected}"
+                                       FalseObject="{StaticResource Chip}" />
+        <HexToColorConverter x:Key="HexToColor" />
+        <ContentFormTemplateSelector x:Key="FormSelector" />
+    </ContentPage.Resources>
+
+    <!-- Narrow: one scrolling column. Wide (≥ 840 px): the preview panel moves into the right column (see code-behind). -->
+    <Grid x:Name="RootGrid" ColumnDefinitions="*,0">
+        <ScrollView x:Name="MainScroll">
+            <VerticalStackLayout x:Name="MainStack" Padding="16,12,16,32" Spacing="16" MaximumWidthRequest="820">
+
+                <!-- 1. Content type -->
+                <VerticalStackLayout x:Name="TypeSection" Spacing="8">
+                    <Label Text="What do you want to share?" Style="{StaticResource SectionHeader}" />
+                    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout Spacing="8" Padding="0,0,0,4" BindableLayout.ItemsSource="{Binding ContentTypes.Items}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="OptionItem">
+                                    <Border Style="{Binding IsSelected, Converter={StaticResource TileStyle}}"
+                                            WidthRequest="84"
+                                            HeightRequest="80"
+                                            Padding="6"
+                                            StrokeShape="RoundRectangle 16"
+                                            SemanticProperties.Description="{Binding SemanticDescription}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid>
+                                            <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                                <Label Text="{Binding Glyph}" Style="{StaticResource IconGlyph}" FontSize="26" />
+                                                <Label Text="{Binding Label}"
+                                                       FontSize="12"
+                                                       HorizontalTextAlignment="Center"
+                                                       LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                            <Label Text="&#xe899;"
+                                                   Style="{StaticResource IconGlyph}"
+                                                   FontSize="13"
+                                                   TextColor="{StaticResource Premium}"
+                                                   HorizontalOptions="End"
+                                                   VerticalOptions="Start"
+                                                   IsVisible="{Binding IsLocked}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </ScrollView>
+                </VerticalStackLayout>
+
+                <!-- 2. Form -->
+                <Border x:Name="FormSection" Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                            <Label Text="{Binding FormGlyph}" Style="{StaticResource IconGlyph}" />
+                            <Label Grid.Column="1" Text="{Binding FormTitle}" Style="{StaticResource Title}" VerticalTextAlignment="Center" />
+                            <PremiumLockBadge Grid.Column="2" IsVisible="{Binding IsFormLocked}" />
+                            <Button Grid.Column="3"
+                                    Text="&#xe0b8;"
+                                    Style="{StaticResource IconButton}"
+                                    Command="{Binding ClearFormCommand}"
+                                    SemanticProperties.Description="Clear the form" />
+                        </Grid>
+
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveForms}"
+                                             BindableLayout.ItemTemplateSelector="{StaticResource FormSelector}" />
+
+                        <Border Style="{StaticResource Banner}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource DangerSoftLight}, Dark={StaticResource DangerSoftDark}}"
+                                IsVisible="{Binding HasValidationMessage}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Text="&#xf8b6;" Style="{StaticResource IconGlyph}" FontSize="20" TextColor="{StaticResource Danger}" VerticalOptions="Start" />
+                                <Label Grid.Column="1" Text="{Binding ValidationMessage}" Style="{StaticResource Body}" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 3. Preview + actions (moved to the side column on wide windows) -->
+                <VerticalStackLayout x:Name="PreviewPanel" Spacing="12">
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="14">
+                            <Border Style="{StaticResource CardAlt}"
+                                    WidthRequest="300"
+                                    HeightRequest="300"
+                                    Padding="12"
+                                    StrokeShape="RoundRectangle 16"
+                                    HorizontalOptions="Center">
+                                <Grid>
+                                    <Image Source="{Binding PreviewImage, Converter={StaticResource BytesToImage}}"
+                                           Aspect="AspectFit"
+                                           IsVisible="{Binding HasPreview}"
+                                           SemanticProperties.Description="{Binding PreviewDescription}" />
+                                    <VerticalStackLayout Spacing="10" VerticalOptions="Center" IsVisible="{Binding ShowPlaceholder}">
+                                        <Label Text="&#xe00a;" Style="{StaticResource IconGlyph}" FontSize="64" Opacity="0.3" />
+                                        <Label Text="{Binding PlaceholderText}" Style="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    <ActivityIndicator IsRunning="{Binding IsPreviewBusy}"
+                                                       IsVisible="{Binding IsPreviewBusy}"
+                                                       WidthRequest="24"
+                                                       HeightRequest="24"
+                                                       HorizontalOptions="End"
+                                                       VerticalOptions="Start"
+                                                       SemanticProperties.Description="Updating preview" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Capacity meter -->
+                            <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowCapacity}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Capacity" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                                    <Label Grid.Column="1" Text="{Binding CapacityText}" Style="{StaticResource Caption}" />
+                                </Grid>
+                                <ProgressBar Progress="{Binding CapacityProgress}" SemanticProperties.Description="{Binding CapacityText}">
+                                    <ProgressBar.Triggers>
+                                        <DataTrigger TargetType="ProgressBar" Binding="{Binding IsCapacityWarning}" Value="True">
+                                            <Setter Property="ProgressColor" Value="{StaticResource Warning}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="ProgressBar" Binding="{Binding IsCapacityExceeded}" Value="True">
+                                            <Setter Property="ProgressColor" Value="{StaticResource Danger}" />
+                                        </DataTrigger>
+                                    </ProgressBar.Triggers>
+                                </ProgressBar>
+                                <Label Text="{Binding CapacityHint}" Style="{StaticResource Caption}" IsVisible="{Binding HasCapacityHint}" />
+                            </VerticalStackLayout>
+
+                            <!-- Premium features in use -->
+                            <Border Style="{StaticResource Banner}" IsVisible="{Binding HasLockedFeatures}">
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                    <Label Text="&#xe7af;" Style="{StaticResource IconGlyph}" TextColor="{StaticResource Premium}" VerticalOptions="Start" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding LockedFeaturesText}" FontAttributes="Bold" />
+                                        <Label Text="Preview them for free. Upgrade to save, share or export." Style="{StaticResource Caption}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Row="1"
+                                            Grid.ColumnSpan="2"
+                                            Text="Upgrade"
+                                            Style="{StaticResource PremiumButton}"
+                                            HeightRequest="44"
+                                            Command="{Binding UpgradeCommand}" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Contrast warning -->
+                            <Border Style="{StaticResource Banner}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource WarningSoftLight}, Dark={StaticResource WarningSoftDark}}"
+                                    IsVisible="{Binding Design.HasContrastWarning}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Text="&#xf083;" Style="{StaticResource IconGlyph}" FontSize="20" TextColor="{StaticResource Warning}" VerticalOptions="Start" />
+                                    <Label Grid.Column="1" Text="{Binding Design.ContrastWarning}" Style="{StaticResource Body}" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Actions -->
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                <Button Grid.ColumnSpan="2"
+                                        Text="Save to gallery"
+                                        Style="{StaticResource PrimaryButton}"
+                                        ContentLayout="Left,8"
+                                        Command="{Binding SaveToGalleryCommand}">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xf090;" Size="20" Color="{StaticResource OnPrimary}" />
+                                    </Button.ImageSource>
+                                </Button>
+                                <Button Grid.Row="1"
+                                        Text="Share"
+                                        Style="{StaticResource SecondaryButton}"
+                                        ContentLayout="Left,8"
+                                        Command="{Binding ShareCommand}">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe80d;" Size="18"
+                                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                    </Button.ImageSource>
+                                </Button>
+                                <Button Grid.Row="1"
+                                        Grid.Column="1"
+                                        Text="Save as file"
+                                        Style="{StaticResource SecondaryButton}"
+                                        ContentLayout="Left,8"
+                                        Command="{Binding SaveAsFileCommand}">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe161;" Size="18"
+                                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                    </Button.ImageSource>
+                                </Button>
+                                <Button Grid.Row="2"
+                                        Text="Copy text"
+                                        Style="{StaticResource TonalButton}"
+                                        ContentLayout="Left,8"
+                                        Command="{Binding CopyTextCommand}">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe14d;" Size="18"
+                                                         Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                                    </Button.ImageSource>
+                                </Button>
+                                <Button Grid.Row="2"
+                                        Grid.Column="1"
+                                        Text="Bulk create"
+                                        Style="{StaticResource TonalButton}"
+                                        ContentLayout="Left,8"
+                                        Command="{Binding BulkCreateCommand}">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe03c;" Size="18"
+                                                         Color="{AppThemeBinding Light={StaticResource PrimaryVariant}, Dark={StaticResource PrimaryDark}}" />
+                                    </Button.ImageSource>
+                                </Button>
+                            </Grid>
+                            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 4. Options -->
+                <Border x:Name="OptionsSection" Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <Label Text="Options" Style="{StaticResource Title}" />
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Barcode format" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding Formats}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsQrFormat}">
+                            <Label Text="Error correction" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding ErrorCorrections}" />
+                            <Label Text="A logo always uses High error correction so the code stays readable."
+                                   Style="{StaticResource Caption}"
+                                   IsVisible="{Binding IsLogoForcingHigh}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Export size" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding Sizes}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="File format" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                            <OptionChipGroup Group="{Binding ExportFormats}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 5. Design studio -->
+                <Border x:Name="DesignSection" Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Label Text="&#xe40a;" Style="{StaticResource IconGlyph}" />
+                            <Label Grid.Column="1" Text="Design studio" Style="{StaticResource Title}" VerticalTextAlignment="Center" />
+                            <Button Grid.Column="2"
+                                    Text="Reset"
+                                    Style="{StaticResource TonalButton}"
+                                    HeightRequest="44"
+                                    Command="{Binding Design.ResetDesignCommand}"
+                                    SemanticProperties.Description="Reset the design to classic black on white" />
+                        </Grid>
+
+                        <OptionChipGroup Group="{Binding Design.Tabs}" />
+
+                        <!-- Presets -->
+                        <FlexLayout Wrap="Wrap"
+                                    Direction="Row"
+                                    IsVisible="{Binding Design.IsPresetsTab}"
+                                    BindableLayout.ItemsSource="{Binding Design.Presets}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="StylePresetItem">
+                                    <Border Style="{StaticResource CardAlt}"
+                                            WidthRequest="96"
+                                            Margin="0,0,10,10"
+                                            Padding="8"
+                                            SemanticProperties.Description="{Binding SemanticDescription}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ApplyCommand}" CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="6">
+                                            <Grid WidthRequest="56" HeightRequest="56" HorizontalOptions="Center">
+                                                <Border BackgroundColor="{Binding BackgroundColor, Converter={StaticResource HexToColor}}"
+                                                        StrokeShape="RoundRectangle 10"
+                                                        StrokeThickness="1"
+                                                        Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                                                <Border BackgroundColor="{Binding ForegroundColor, Converter={StaticResource HexToColor}}"
+                                                        WidthRequest="28"
+                                                        HeightRequest="28"
+                                                        StrokeShape="RoundRectangle 6"
+                                                        HorizontalOptions="Center"
+                                                        VerticalOptions="Center" />
+                                                <Border BackgroundColor="{Binding AccentColor, Converter={StaticResource HexToColor}}"
+                                                        WidthRequest="12"
+                                                        HeightRequest="12"
+                                                        Margin="6"
+                                                        StrokeShape="RoundRectangle 3"
+                                                        HorizontalOptions="Start"
+                                                        VerticalOptions="Start" />
+                                            </Grid>
+                                            <Label Text="{Binding Name}" FontSize="12" HorizontalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <!-- Colours + gradient -->
+                        <VerticalStackLayout Spacing="16" IsVisible="{Binding Design.IsColorsTab}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Text="&#xf0be;" Style="{StaticResource IconGlyph}" FontSize="20" TextColor="{StaticResource Success}" IsVisible="{Binding Design.IsContrastGood}" />
+                                <Label Text="&#xf083;" Style="{StaticResource IconGlyph}" FontSize="20" TextColor="{StaticResource Warning}" IsVisible="{Binding Design.HasContrastWarning}" />
+                                <Label Grid.Column="1" Text="{Binding Design.ContrastText}" Style="{StaticResource Body}" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="2"
+                                        Text="&#xe8d5;"
+                                        Style="{StaticResource IconButton}"
+                                        Command="{Binding Design.SwapColorsCommand}"
+                                        SemanticProperties.Description="Swap code and background colours" />
+                            </Grid>
+
+                            <ColorSwatchPicker Title="Code colour" Color="{Binding Design.ForegroundColor}" IsVisible="{Binding Design.ShowSolidForeground}" />
+                            <ColorSwatchPicker Title="Background" Color="{Binding Design.BackgroundColor}" IsVisible="{Binding Design.ShowBackgroundColor}" />
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Transparent background" VerticalTextAlignment="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding Design.TransparentBackground}" SemanticProperties.Description="Transparent background" />
+                            </Grid>
+
+                            <VerticalStackLayout Spacing="12" IsVisible="{Binding Design.SupportsAdvancedStyling}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Custom eye colour" VerticalTextAlignment="Center" />
+                                    <Switch Grid.Column="1" IsToggled="{Binding Design.UseCustomEyeColor}" SemanticProperties.Description="Custom eye colour" />
+                                </Grid>
+                                <ColorSwatchPicker Title="Eye colour" Color="{Binding Design.EyeColor}" IsVisible="{Binding Design.UseCustomEyeColor}" />
+                            </VerticalStackLayout>
+
+                            <BoxView HeightRequest="1" />
+
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Label Text="Gradient" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <PremiumLockBadge Grid.Column="1" IsVisible="{Binding Design.IsGradientLocked}" />
+                                <Switch Grid.Column="2" IsToggled="{Binding Design.UseGradient}" SemanticProperties.Description="Use a gradient" />
+                            </Grid>
+                            <VerticalStackLayout Spacing="12" IsVisible="{Binding Design.UseGradient}">
+                                <OptionChipGroup Group="{Binding Design.GradientTypes}" />
+                                <ColorSwatchPicker Title="Start colour" Color="{Binding Design.GradientStartColor}" />
+                                <ColorSwatchPicker Title="End colour" Color="{Binding Design.GradientEndColor}" />
+                                <VerticalStackLayout Spacing="4" IsVisible="{Binding Design.IsLinearGradient}">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="Angle" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding Design.GradientAngleText}" Style="{StaticResource Caption}" />
+                                    </Grid>
+                                    <Slider Maximum="360" Minimum="0" Value="{Binding Design.GradientAngle}" SemanticProperties.Description="Gradient angle" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Shapes -->
+                        <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.IsShapesTab}">
+                            <Label Text="Module and eye shapes are available for QR codes." Style="{StaticResource Muted}" IsVisible="{Binding Design.NoAdvancedStyling}" />
+                            <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.SupportsAdvancedStyling}">
+                                <VerticalStackLayout Spacing="6">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="Module shape" Style="{StaticResource Caption}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                        <PremiumLockBadge IsVisible="{Binding Design.AreShapesLocked}" />
+                                    </HorizontalStackLayout>
+                                    <OptionChipGroup Group="{Binding Design.ModuleShapes}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="6">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="Eye frame" Style="{StaticResource Caption}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                        <PremiumLockBadge IsVisible="{Binding Design.AreEyesLocked}" />
+                                    </HorizontalStackLayout>
+                                    <OptionChipGroup Group="{Binding Design.EyeFrameShapes}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="Eye centre" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                                    <OptionChipGroup Group="{Binding Design.EyeBallShapes}" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                            <BoxView HeightRequest="1" />
+
+                            <VerticalStackLayout Spacing="4">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Quiet zone" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                                    <Label Grid.Column="1" Text="{Binding Design.QuietZoneText}" Style="{StaticResource Caption}" />
+                                </Grid>
+                                <Slider Maximum="10" Minimum="0" Value="{Binding Design.QuietZone}" SemanticProperties.Description="Quiet zone in modules" />
+                                <Label Text="Below 4 modules some scanners struggle to find the code."
+                                       Style="{StaticResource Caption}"
+                                       TextColor="{StaticResource Warning}"
+                                       IsVisible="{Binding Design.IsQuietZoneSmall}" />
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Design.IsOneDimensional}">
+                                <Label Text="Show the digits under the barcode" VerticalTextAlignment="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding Design.ShowHumanReadableText}" SemanticProperties.Description="Show human-readable text" />
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Logo -->
+                        <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.IsLogoTab}">
+                            <Label Text="Logos are available for QR codes." Style="{StaticResource Muted}" IsVisible="{Binding Design.NoAdvancedStyling}" />
+                            <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.SupportsAdvancedStyling}">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="Logo in the centre" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                    <PremiumLockBadge IsVisible="{Binding Design.IsLogoLocked}" />
+                                </HorizontalStackLayout>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                    <Border Style="{StaticResource CardAlt}" WidthRequest="76" HeightRequest="76" Padding="6">
+                                        <Grid>
+                                            <Image Source="{Binding Design.LogoBytes, Converter={StaticResource BytesToImage}}"
+                                                   Aspect="AspectFit"
+                                                   IsVisible="{Binding Design.HasLogo}"
+                                                   SemanticProperties.Description="Selected logo" />
+                                            <Label Text="&#xe3f4;" Style="{StaticResource IconGlyph}" FontSize="32" Opacity="0.35" IsVisible="{Binding Design.HasNoLogo}" />
+                                        </Grid>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                        <Button Text="Choose image" Style="{StaticResource TonalButton}" Command="{Binding Design.PickLogoCommand}" />
+                                        <Button Text="Remove logo" Style="{StaticResource SecondaryButton}" Command="{Binding Design.RemoveLogoCommand}" IsVisible="{Binding Design.HasLogo}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <VerticalStackLayout Spacing="10" IsVisible="{Binding Design.HasLogo}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="Logo size" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                                            <Label Grid.Column="1" Text="{Binding Design.LogoSizeText}" Style="{StaticResource Caption}" />
+                                        </Grid>
+                                        <Slider Maximum="30" Minimum="10" Value="{Binding Design.LogoSizePercent}" SemanticProperties.Description="Logo size in percent" />
+                                        <Label Text="Large logos can make the code hard to scan. 25 % or less is safest."
+                                               Style="{StaticResource Caption}"
+                                               TextColor="{StaticResource Warning}"
+                                               IsVisible="{Binding Design.IsLogoLarge}" />
+                                    </VerticalStackLayout>
+                                    <Label Text="Logo background" Style="{StaticResource Caption}" FontAttributes="Bold" />
+                                    <OptionChipGroup Group="{Binding Design.LogoBackgrounds}" />
+                                    <Label Text="Codes with a logo switch to High error correction automatically." Style="{StaticResource Caption}" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Frame -->
+                        <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.IsFrameTab}">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Frame and call to action" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <PremiumLockBadge IsVisible="{Binding Design.IsFrameLocked}" />
+                            </HorizontalStackLayout>
+                            <OptionChipGroup Group="{Binding Design.FrameStyles}" />
+                            <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.HasFrame}">
+                                <FormField Label="Frame text" Placeholder="SCAN ME" MaxLength="30" Text="{Binding Design.FrameText}" />
+                                <ColorSwatchPicker Title="Frame colour" Color="{Binding Design.FrameColor}" />
+                                <ColorSwatchPicker Title="Text colour" Color="{Binding Design.FrameTextColor}" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Brand kits -->
+                        <VerticalStackLayout Spacing="14" IsVisible="{Binding Design.IsBrandKitsTab}">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Brand kits" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <PremiumLockBadge IsVisible="{Binding Design.AreBrandKitsLocked}" />
+                            </HorizontalStackLayout>
+                            <Label Text="Save the current design, logo included, and apply it to any code in one tap." Style="{StaticResource Muted}" />
+                            <Button Text="Save current design" Style="{StaticResource PrimaryButton}" Command="{Binding Design.SaveBrandKitCommand}" />
+                            <Label Text="No brand kits yet."
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding Design.HasBrandKits, Converter={StaticResource InvertedBool}}" />
+                            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Design.BrandKits}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="BrandKitItem">
+                                        <Border Style="{StaticResource CardAlt}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                                                <Grid WidthRequest="40" HeightRequest="40" VerticalOptions="Center">
+                                                    <Border BackgroundColor="{Binding BackgroundColor, Converter={StaticResource HexToColor}}"
+                                                            StrokeShape="RoundRectangle 8"
+                                                            StrokeThickness="1"
+                                                            Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                                                    <Border BackgroundColor="{Binding ForegroundColor, Converter={StaticResource HexToColor}}"
+                                                            WidthRequest="20"
+                                                            HeightRequest="20"
+                                                            StrokeShape="RoundRectangle 4"
+                                                            HorizontalOptions="Center"
+                                                            VerticalOptions="Center" />
+                                                </Grid>
+                                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                    <Label Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                                                    <Label Text="Includes logo" Style="{StaticResource Caption}" IsVisible="{Binding HasLogo}" />
+                                                </VerticalStackLayout>
+                                                <Button Grid.Column="2"
+                                                        Text="Apply"
+                                                        Style="{StaticResource TonalButton}"
+                                                        HeightRequest="44"
+                                                        Command="{Binding ApplyCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        SemanticProperties.Description="{Binding ApplyDescription}" />
+                                                <Button Grid.Column="3"
+                                                        Text="&#xe92e;"
+                                                        Style="{StaticResource IconButton}"
+                                                        Command="{Binding DeleteCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        SemanticProperties.Description="{Binding DeleteDescription}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ScrollView x:Name="SideScroll" Grid.Column="1" IsVisible="False">
+            <VerticalStackLayout x:Name="SideStack" Padding="0,12,16,32" />
+        </ScrollView>
+    </Grid>
+</ContentPage>

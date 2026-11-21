@@ -1,0 +1,28 @@
+<Project>
+  <!-- Shared build settings for every project in the repository. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Treat nullable-reference violations as errors everywhere; other warnings stay warnings. -->
+    <WarningsAsErrors>$(WarningsAsErrors);nullable</WarningsAsErrors>
+
+    <Authors>Muhammad Bilal</Authors>
+    <Company>Muhammad Bilal</Company>
+    <Product>QuickQr</Product>
+    <Copyright>© 2026 Muhammad Bilal. All rights reserved.</Copyright>
+    <RepositoryUrl>https://github.com/smuhammadbilalh/QuickQr</RepositoryUrl>
+    <NeutralLanguage>en</NeutralLanguage>
+
+    <!-- Single source of truth for the product version (MAUI ApplicationDisplayVersion reads this). -->
+    <QuickQrVersion>3.0.0</QuickQrVersion>
+    <QuickQrBuildNumber>3</QuickQrBuildNumber>
+    <Version>$(QuickQrVersion)</Version>
+  </PropertyGroup>
+  <!-- QuickQr.Core and QuickQr.Infrastructure set TreatWarningsAsErrors themselves; the MAUI head does not,
+       because transitive platform packages emit warnings outside our control. -->
+</Project>
